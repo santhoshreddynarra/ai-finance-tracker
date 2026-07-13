@@ -4,31 +4,37 @@ import helmet from "helmet";
 import rateLimit from "express-rate-limit";
 import { errorHandler, notFound } from "./middleware/errorMiddleware.js";
 
+// Routes
+import authRoutes from "./routes/authRoutes.js";
+
 const app = express();
 
 // Security and utility middleware
 app.use(helmet());
-app.use(cors());
+app.use(
+  cors({
+    origin: process.env.FRONTEND_URL || "http://localhost:5173",
+    credentials: true,
+  })
+);
 app.use(express.json());
 
 // Rate limiting
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // Limit each IP to 100 requests per windowMs
+  max: 100,
 });
 app.use(limiter);
 
-// Health Endpoint
+// ── Health Endpoint ──────────────────────────
 app.get("/health", (req, res) => {
   res.status(200).json({ status: "success", message: "API is healthy" });
 });
 
-// Fallback route
-app.get("/", (req, res) => {
-  res.send("AI Finance Tracker API is Running...");
-});
+// ── API Routes ───────────────────────────────
+app.use("/api/auth", authRoutes);
 
-// Error handling middleware
+// ── Error Handling ───────────────────────────
 app.use(notFound);
 app.use(errorHandler);
 

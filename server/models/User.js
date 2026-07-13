@@ -55,13 +55,12 @@ userSchema.index({ createdAt: -1 });
 // ─────────────────────────────────────────────
 // Pre-save Hook — Password Hashing
 // ─────────────────────────────────────────────
-userSchema.pre("save", async function (next) {
+userSchema.pre("save", async function () {
   // Skip hashing if the password field was not modified.
   // This prevents re-hashing on updates to other fields (e.g., name, email).
-  if (!this.isModified("password")) return next();
+  if (!this.isModified("password")) return;
 
   this.password = await bcrypt.hash(this.password, SALT_ROUNDS);
-  next();
 });
 
 // ─────────────────────────────────────────────
