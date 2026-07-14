@@ -1,6 +1,5 @@
 import React from "react";
 import { useSelector } from "react-redux";
-import Navbar from "../components/layout/Navbar";
 
 /**
  * Temporary dashboard placeholder — replaced in a future phase
@@ -10,16 +9,16 @@ const Dashboard = () => {
   const { user } = useSelector((state) => state.auth);
 
   return (
-    <div className="min-h-screen bg-[#0a0a14]">
+    <div className="relative">
       {/* Fixed ambient blobs */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div className="absolute -top-40 -left-40 w-96 h-96 bg-violet-700/10 rounded-full blur-3xl" />
         <div className="absolute top-1/2 right-0 w-72 h-72 bg-indigo-700/10 rounded-full blur-3xl" />
       </div>
 
-      <Navbar />
 
-      <main className="relative pt-24 pb-12 px-4 sm:px-6 max-w-7xl mx-auto">
+
+      <main className="relative pt-8 pb-12 px-4 sm:px-6 max-w-7xl mx-auto">
         {/* Welcome */}
         <div className="mb-10">
           <h1 className="text-3xl sm:text-4xl font-bold text-white">

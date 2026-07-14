@@ -6,9 +6,10 @@ import store from "./store/store";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
-import ProtectedRoute from "./components/auth/ProtectedRoute";
-
 import Profile from "./pages/Profile";
+import Transactions from "./pages/Transactions";
+import ProtectedRoute from "./components/auth/ProtectedRoute";
+import DashboardLayout from "./components/layout/DashboardLayout";
 
 const App = () => {
   return (
@@ -21,8 +22,9 @@ const App = () => {
 
           {/* Protected routes */}
           <Route element={<ProtectedRoute />}>
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/profile" element={<Profile />} />
+            <Route path="/dashboard" element={<DashboardLayout><Dashboard /></DashboardLayout>} />
+            <Route path="/transactions" element={<DashboardLayout><Transactions /></DashboardLayout>} />
+            <Route path="/profile" element={<DashboardLayout><Profile /></DashboardLayout>} />
           </Route>
 
           {/* Default redirect */}

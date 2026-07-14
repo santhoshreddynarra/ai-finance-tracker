@@ -92,7 +92,7 @@ const Profile = () => {
   };
 
   return (
-    <div className="pt-24 pb-12 px-4 sm:px-6 max-w-4xl mx-auto space-y-8">
+    <div className="pt-8 pb-12 px-4 sm:px-6 max-w-4xl mx-auto space-y-8">
       <div>
         <h1 className="text-3xl font-bold text-white tracking-tight">Your Profile</h1>
         <p className="text-slate-400 mt-2">Manage your account settings and preferences.</p>
