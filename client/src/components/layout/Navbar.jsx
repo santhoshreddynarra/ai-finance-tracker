@@ -33,9 +33,9 @@ const Navbar = () => {
         {/* Right side */}
         <div className="flex items-center gap-4">
           {user && (
-            <span className="text-sm text-slate-400 hidden sm:block">
+            <Link to="/profile" className="text-sm text-slate-400 hover:text-white hidden sm:block transition-colors">
               {user.name}
-            </span>
+            </Link>
           )}
           <button
             id="logout-btn"

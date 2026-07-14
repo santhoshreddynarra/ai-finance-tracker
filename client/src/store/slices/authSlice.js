@@ -57,6 +57,45 @@ export const loginUser = createAsyncThunk(
   }
 );
 
+/**
+ * Update user profile (name, email)
+ */
+export const updateProfile = createAsyncThunk(
+  "auth/updateProfile",
+  async (formData, { rejectWithValue }) => {
+    try {
+      const { data } = await api.put("/auth/profile", formData);
+      const token = localStorage.getItem("token"); // Token doesn't change
+      persistAuth(data.user, token);
+      return data;
+    } catch (err) {
+      return rejectWithValue(
+        err.response?.data?.message || "Profile update failed. Please try again."
+      );
+    }
+  }
+);
+
+/**
+ * Change user password
+ */
+export const changePassword = createAsyncThunk(
+  "auth/changePassword",
+  async (formData, { rejectWithValue }) => {
+    try {
+      const { data } = await api.put("/auth/password", formData);
+      if (data.token) {
+        persistAuth(data.user, data.token); // Token might change
+      }
+      return data;
+    } catch (err) {
+      return rejectWithValue(
+        err.response?.data?.message || "Password change failed. Please try again."
+      );
+    }
+  }
+);
+
 // ─── Slice ─────────────────────────────────────────────────────────────────
 const { user: storedUser, token: storedToken } = loadFromStorage();
 
@@ -115,6 +154,38 @@ const authSlice = createSlice({
         state.token = action.payload.token;
       })
       .addCase(loginUser.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      });
+
+    // ── Update Profile ──────────────────────────
+    builder
+      .addCase(updateProfile.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(updateProfile.fulfilled, (state, action) => {
+        state.loading = false;
+        state.user = action.payload.user;
+      })
+      .addCase(updateProfile.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      });
+
+    // ── Change Password ─────────────────────────
+    builder
+      .addCase(changePassword.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(changePassword.fulfilled, (state, action) => {
+        state.loading = false;
+        if (action.payload.token) {
+          state.token = action.payload.token;
+        }
+      })
+      .addCase(changePassword.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       });

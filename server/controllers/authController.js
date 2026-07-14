@@ -140,3 +140,138 @@ export const login = async (req, res) => {
     });
   }
 };
+
+// ─────────────────────────────────────────────
+// @desc    Get current logged in user
+// @route   GET /api/auth/me
+// @access  Private
+// ─────────────────────────────────────────────
+export const getCurrentUser = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id);
+    
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      user: sanitizeUser(user),
+    });
+  } catch (err) {
+    console.error("Get user error:", err);
+    return res.status(500).json({
+      success: false,
+      message: "Server error. Please try again later.",
+    });
+  }
+};
+
+// ─────────────────────────────────────────────
+// @desc    Update user profile
+// @route   PUT /api/auth/profile
+// @access  Private
+// ─────────────────────────────────────────────
+export const updateProfile = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id);
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    // Check if updating to an email that already exists
+    if (req.body.email && req.body.email !== user.email) {
+      const emailExists = await User.findOne({ email: req.body.email });
+      if (emailExists) {
+        return res.status(409).json({
+          success: false,
+          message: "An account with this email already exists.",
+        });
+      }
+    }
+
+    user.name = req.body.name || user.name;
+    user.email = req.body.email || user.email;
+
+    const updatedUser = await user.save();
+
+    return res.status(200).json({
+      success: true,
+      user: sanitizeUser(updatedUser),
+    });
+  } catch (err) {
+    console.error("Update profile error:", err);
+    return res.status(500).json({
+      success: false,
+      message: "Server error. Please try again later.",
+    });
+  }
+};
+
+// ─────────────────────────────────────────────
+// @desc    Change password
+// @route   PUT /api/auth/password
+// @access  Private
+// ─────────────────────────────────────────────
+export const changePassword = async (req, res) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({
+        success: false,
+        message: "Please provide current and new password.",
+      });
+    }
+
+    if (newPassword.length < 8) {
+      return res.status(400).json({
+        success: false,
+        message: "New password must be at least 8 characters.",
+      });
+    }
+
+    const user = await User.findById(req.user.id).select("+password");
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    // Verify current password
+    if (!(await user.matchPassword(currentPassword))) {
+      return res.status(401).json({
+        success: false,
+        message: "Incorrect current password.",
+      });
+    }
+
+    user.password = newPassword;
+    await user.save();
+
+    // Optionally generate a new token
+    const token = generateToken(user._id);
+
+    return res.status(200).json({
+      success: true,
+      message: "Password changed successfully.",
+      token, // return new token
+      user: sanitizeUser(user),
+    });
+  } catch (err) {
+    console.error("Change password error:", err);
+    return res.status(500).json({
+      success: false,
+      message: "Server error. Please try again later.",
+    });
+  }
+};
