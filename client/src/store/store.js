@@ -11,7 +11,7 @@ const store = configureStore({
     auth: authReducer,
     transactions: transactionReducer,
     categories: categoryReducer,
-    budgets: budgetReducer,
+    budget: budgetReducer,
     dashboard: dashboardReducer,
     ai: aiReducer,
   },
