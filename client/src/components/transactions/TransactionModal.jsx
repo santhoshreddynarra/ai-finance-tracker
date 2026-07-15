@@ -1,19 +1,10 @@
 import React, { useState, useEffect } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { addTransaction, editTransaction } from "../../store/slices/transactionSlice";
+import { fetchCategories } from "../../store/slices/categorySlice";
 import InputField from "../ui/InputField";
 import Button from "../ui/Button";
 
-const CATEGORIES = [
-  "Food",
-  "Travel",
-  "Entertainment",
-  "Bills",
-  "Shopping",
-  "Salary",
-  "Investment",
-  "Other"
-];
 
 const PAYMENT_METHODS = [
   "Cash",
@@ -25,12 +16,13 @@ const PAYMENT_METHODS = [
 
 const TransactionModal = ({ isOpen, onClose, transactionToEdit }) => {
   const dispatch = useDispatch();
+  const { items: categories } = useSelector((state) => state.categories);
   
   const [form, setForm] = useState({
     type: "expense",
     title: "",
     amount: "",
-    category: "Food",
+    category: "",
     paymentMethod: "Cash",
     description: "",
     transactionDate: new Date().toISOString().split("T")[0],
@@ -50,17 +42,24 @@ const TransactionModal = ({ isOpen, onClose, transactionToEdit }) => {
         type: "expense",
         title: "",
         amount: "",
-        category: "Food",
+        category: categories.length > 0 ? categories[0].name : "",
         paymentMethod: "Cash",
         description: "",
         transactionDate: new Date().toISOString().split("T")[0],
       });
     }
     setErrors({});
-  }, [transactionToEdit, isOpen]);
+  }, [transactionToEdit, isOpen, categories]);
+
+  useEffect(() => {
+    if (isOpen && categories.length === 0) {
+      dispatch(fetchCategories());
+    }
+  }, [isOpen, dispatch, categories.length]);
 
   if (!isOpen) return null;
 
+  const currentTypeCategories = categories.filter(c => c.type === form.type);
   const handleChange = (e) => {
     const { name, value } = e.target;
     setForm(prev => ({ ...prev, [name]: value }));
@@ -130,14 +129,18 @@ const TransactionModal = ({ isOpen, onClose, transactionToEdit }) => {
             <div className="flex bg-white/5 rounded-lg p-1 border border-white/10">
               <button
                 type="button"
-                onClick={() => setForm(prev => ({ ...prev, type: "expense" }))}
+                onClick={() => {
+                  setForm(prev => ({ ...prev, type: "expense", category: categories.find(c => c.type === "expense")?.name || "" }));
+                }}
                 className={`flex-1 py-2 text-sm font-medium rounded-md transition-all ${form.type === "expense" ? "bg-rose-500/20 text-rose-400 shadow-sm" : "text-slate-400 hover:text-white"}`}
               >
                 Expense
               </button>
               <button
                 type="button"
-                onClick={() => setForm(prev => ({ ...prev, type: "income" }))}
+                onClick={() => {
+                  setForm(prev => ({ ...prev, type: "income", category: categories.find(c => c.type === "income")?.name || "" }));
+                }}
                 className={`flex-1 py-2 text-sm font-medium rounded-md transition-all ${form.type === "income" ? "bg-emerald-500/20 text-emerald-400 shadow-sm" : "text-slate-400 hover:text-white"}`}
               >
                 Income
@@ -174,7 +177,8 @@ const TransactionModal = ({ isOpen, onClose, transactionToEdit }) => {
                   onChange={handleChange}
                   className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-slate-300 focus:outline-none focus:border-violet-500/50 transition-colors"
                 >
-                  {CATEGORIES.map(cat => <option key={cat} value={cat} className="bg-[#11111a]">{cat}</option>)}
+                  <option value="" disabled>Select category</option>
+                  {currentTypeCategories.map(cat => <option key={cat._id} value={cat.name} className="bg-[#11111a]">{cat.name}</option>)}
                 </select>
                 {errors.category && <p className="text-red-400 text-xs mt-1">{errors.category}</p>}
               </div>

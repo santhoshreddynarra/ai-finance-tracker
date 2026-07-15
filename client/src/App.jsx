@@ -8,6 +8,8 @@ import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
 import Profile from "./pages/Profile";
 import Transactions from "./pages/Transactions";
+import Categories from "./pages/Categories";
+import Budget from "./pages/Budget";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 import DashboardLayout from "./components/layout/DashboardLayout";
 
@@ -24,6 +26,8 @@ const App = () => {
           <Route element={<ProtectedRoute />}>
             <Route path="/dashboard" element={<DashboardLayout><Dashboard /></DashboardLayout>} />
             <Route path="/transactions" element={<DashboardLayout><Transactions /></DashboardLayout>} />
+            <Route path="/categories" element={<DashboardLayout><Categories /></DashboardLayout>} />
+            <Route path="/budget" element={<DashboardLayout><Budget /></DashboardLayout>} />
             <Route path="/profile" element={<DashboardLayout><Profile /></DashboardLayout>} />
           </Route>
 

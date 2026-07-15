@@ -6,7 +6,8 @@ import { logout } from "../../store/slices/authSlice";
 const navigation = [
   { name: "Dashboard", href: "/dashboard", disabled: true },
   { name: "Transactions", href: "/transactions", disabled: false },
-  { name: "Budget", href: "/budget", disabled: true },
+  { name: "Categories", href: "/categories", disabled: false },
+  { name: "Budget", href: "/budget", disabled: false },
   { name: "Reports", href: "/reports", disabled: true },
   { name: "AI Insights", href: "/ai", disabled: true },
   { name: "Profile", href: "/profile", disabled: false },
