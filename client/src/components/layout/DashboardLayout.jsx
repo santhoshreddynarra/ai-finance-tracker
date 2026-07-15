@@ -8,8 +8,9 @@ const navigation = [
   { name: "Transactions", href: "/transactions", disabled: false },
   { name: "Categories", href: "/categories", disabled: false },
   { name: "Budget", href: "/budget", disabled: false },
-  { name: "Reports", href: "/reports", disabled: true },
+  { name: "Reports", href: "/reports", disabled: false },
   { name: "AI Insights", href: "/ai", disabled: false },
+  { name: "Settings", href: "/settings", disabled: false },
   { name: "Profile", href: "/profile", disabled: false },
 ];
 

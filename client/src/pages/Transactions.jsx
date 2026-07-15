@@ -30,7 +30,10 @@ const Transactions = () => {
       search: filters.search,
       type: filters.type,
       category: filters.category,
-      sort: filters.sort
+      sort: filters.sort,
+      paymentMethod: filters.paymentMethod,
+      minAmount: filters.minAmount,
+      maxAmount: filters.maxAmount
     }));
   }, [dispatch, pagination.page, filters]);
 
@@ -114,6 +117,36 @@ const Transactions = () => {
             <option value="highest" className="bg-[#11111a]">Highest Amount</option>
             <option value="lowest" className="bg-[#11111a]">Lowest Amount</option>
           </select>
+
+          <select 
+            name="paymentMethod" 
+            value={filters.paymentMethod || ""} 
+            onChange={handleFilterChange}
+            className="bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-sm text-slate-300 focus:outline-none focus:border-violet-500/50 transition-colors"
+          >
+            <option value="" className="bg-[#11111a]">Any Payment</option>
+            <option value="Cash" className="bg-[#11111a]">Cash</option>
+            <option value="Card" className="bg-[#11111a]">Card</option>
+            <option value="UPI" className="bg-[#11111a]">UPI</option>
+            <option value="Bank Transfer" className="bg-[#11111a]">Bank Transfer</option>
+          </select>
+          
+          <input 
+            type="number"
+            name="minAmount"
+            placeholder="Min ₹"
+            value={filters.minAmount || ""}
+            onChange={handleFilterChange}
+            className="bg-white/5 border border-white/10 rounded-xl px-3 py-2 w-24 text-sm text-slate-300 focus:outline-none focus:border-violet-500/50 transition-colors placeholder-slate-500"
+          />
+          <input 
+            type="number"
+            name="maxAmount"
+            placeholder="Max ₹"
+            value={filters.maxAmount || ""}
+            onChange={handleFilterChange}
+            className="bg-white/5 border border-white/10 rounded-xl px-3 py-2 w-24 text-sm text-slate-300 focus:outline-none focus:border-violet-500/50 transition-colors placeholder-slate-500"
+          />
         </div>
       </div>
 

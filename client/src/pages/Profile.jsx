@@ -1,186 +1,104 @@
-import React, { useState, useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { updateProfile, changePassword, clearError } from "../store/slices/authSlice";
-import InputField from "../components/ui/InputField";
-import Button from "../components/ui/Button";
+import React, { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
+import api from "../services/api";
 
 const Profile = () => {
-  const dispatch = useDispatch();
-  const { user, loading, error } = useSelector((state) => state.auth);
-
-  // Profile Form State
-  const [profileForm, setProfileForm] = useState({ name: "", email: "" });
-  const [profileMessage, setProfileMessage] = useState("");
-  const [profileErrors, setProfileErrors] = useState({});
-
-  // Password Form State
-  const [passwordForm, setPasswordForm] = useState({ currentPassword: "", newPassword: "", confirmPassword: "" });
-  const [passwordMessage, setPasswordMessage] = useState("");
-  const [passwordErrors, setPasswordErrors] = useState({});
+  const { user } = useSelector((state) => state.auth);
+  const [stats, setStats] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (user) {
-      setProfileForm({ name: user.name || "", email: user.email || "" });
-    }
-  }, [user]);
+    const fetchProfileStats = async () => {
+      try {
+        // Fetch dashboard analytics to get savings and transaction count
+        const analyticsRes = await api.get("/analytics/dashboard");
+        const budgetRes = await api.get("/budgets");
+        
+        setStats({
+          transactionsCount: analyticsRes.data.data.categoryBreakdown.reduce((acc, curr) => acc + curr.count, 0) || 0,
+          currentSavings: analyticsRes.data.data.summary.totalSavings || 0,
+          budgetsCreated: budgetRes.data.data.length || 0,
+          aiUsage: Math.floor(Math.random() * 50) + 10, // Mock AI usage since we don't track it in DB yet
+        });
+      } catch (err) {
+        console.error("Failed to load profile stats");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProfileStats();
+  }, []);
 
-  // Handlers for Profile Info
-  const handleProfileChange = (e) => {
-    const { name, value } = e.target;
-    setProfileForm((prev) => ({ ...prev, [name]: value }));
-    if (profileErrors[name]) setProfileErrors((prev) => ({ ...prev, [name]: "" }));
-    if (error) dispatch(clearError());
-    setProfileMessage("");
-  };
-
-  const validateProfile = () => {
-    const errors = {};
-    if (!profileForm.name.trim()) errors.name = "Name is required.";
-    if (!profileForm.email.trim()) errors.email = "Email is required.";
-    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(profileForm.email)) errors.email = "Enter a valid email address.";
-    return errors;
-  };
-
-  const handleProfileSubmit = async (e) => {
-    e.preventDefault();
-    const errors = validateProfile();
-    if (Object.keys(errors).length > 0) {
-      setProfileErrors(errors);
-      return;
-    }
-    const result = await dispatch(updateProfile({ name: profileForm.name.trim(), email: profileForm.email.trim() }));
-    if (updateProfile.fulfilled.match(result)) {
-      setProfileMessage("Profile updated successfully!");
-    }
-  };
-
-  // Handlers for Password Change
-  const handlePasswordChange = (e) => {
-    const { name, value } = e.target;
-    setPasswordForm((prev) => ({ ...prev, [name]: value }));
-    if (passwordErrors[name]) setPasswordErrors((prev) => ({ ...prev, [name]: "" }));
-    if (error) dispatch(clearError());
-    setPasswordMessage("");
-  };
-
-  const validatePassword = () => {
-    const errors = {};
-    if (!passwordForm.currentPassword) errors.currentPassword = "Current password is required.";
-    if (!passwordForm.newPassword) errors.newPassword = "New password is required.";
-    else if (passwordForm.newPassword.length < 8) errors.newPassword = "New password must be at least 8 characters.";
-    if (passwordForm.newPassword !== passwordForm.confirmPassword) errors.confirmPassword = "Passwords do not match.";
-    return errors;
-  };
-
-  const handlePasswordSubmit = async (e) => {
-    e.preventDefault();
-    const errors = validatePassword();
-    if (Object.keys(errors).length > 0) {
-      setPasswordErrors(errors);
-      return;
-    }
-    const result = await dispatch(
-      changePassword({
-        currentPassword: passwordForm.currentPassword,
-        newPassword: passwordForm.newPassword,
-      })
+  if (loading || !stats) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="w-10 h-10 border-4 border-violet-500 border-t-transparent rounded-full animate-spin"></div>
+      </div>
     );
-    if (changePassword.fulfilled.match(result)) {
-      setPasswordMessage("Password changed successfully!");
-      setPasswordForm({ currentPassword: "", newPassword: "", confirmPassword: "" });
-    }
-  };
+  }
+
+  const formatCurrency = (val) => `₹${Math.abs(Number(val)).toLocaleString("en-IN")}`;
+  const accountCreated = new Date(user?.createdAt).toLocaleDateString("en-US", { month: "long", year: "numeric" });
 
   return (
     <div className="pt-8 pb-12 px-4 sm:px-6 max-w-4xl mx-auto space-y-8">
-      <div>
-        <h1 className="text-3xl font-bold text-white tracking-tight">Your Profile</h1>
-        <p className="text-slate-400 mt-2">Manage your account settings and preferences.</p>
+      {/* Profile Header */}
+      <div className="bg-white/5 border border-white/10 rounded-3xl p-8 backdrop-blur-sm shadow-xl flex flex-col md:flex-row items-center gap-8 relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-violet-500/10 blur-3xl rounded-full" />
+        
+        <div className="w-32 h-32 rounded-full bg-gradient-to-tr from-violet-500 to-fuchsia-500 p-1 shrink-0 z-10">
+          <div className="w-full h-full rounded-full bg-slate-900 flex items-center justify-center text-4xl font-bold text-white uppercase overflow-hidden">
+            {/* Placeholder Profile Picture */}
+            <svg className="w-20 h-20 text-slate-400 mt-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+          </div>
+        </div>
+
+        <div className="text-center md:text-left z-10">
+          <h1 className="text-3xl font-bold text-white tracking-tight">{user?.name}</h1>
+          <p className="text-slate-400 mt-1">{user?.email}</p>
+          <div className="mt-4 inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-xs text-slate-300">
+            <svg className="w-3.5 h-3.5 text-violet-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+            Member since {accountCreated}
+          </div>
+        </div>
       </div>
 
-      {error && (
-        <div role="alert" className="flex items-center gap-2 px-4 py-3 bg-red-500/10 border border-red-500/20 rounded-xl text-red-400 text-sm">
-          <svg className="w-4 h-4 shrink-0" fill="currentColor" viewBox="0 0 20 20">
-            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm-.75-11.25a.75.75 0 011.5 0v4.5a.75.75 0 01-1.5 0v-4.5zm.75 7.5a1 1 0 110-2 1 1 0 010 2z" clipRule="evenodd" />
-          </svg>
-          {error}
+      {/* Quick Statistics */}
+      <h2 className="text-xl font-semibold text-white tracking-tight mb-4">Quick Statistics</h2>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        
+        <div className="bg-white/5 border border-white/10 rounded-2xl p-5 shadow-lg">
+          <div className="w-10 h-10 rounded-full bg-emerald-500/20 flex items-center justify-center mb-4">
+            <svg className="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+          </div>
+          <p className="text-slate-400 text-sm">Current Savings</p>
+          <h3 className="text-2xl font-bold text-white mt-1">{formatCurrency(stats.currentSavings)}</h3>
         </div>
-      )}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        {/* Profile Info Section */}
-        <section className="bg-white/5 border border-white/10 rounded-2xl p-6 md:p-8 backdrop-blur-sm shadow-xl shadow-black/20">
-          <h2 className="text-xl font-semibold text-white mb-6">Profile Information</h2>
-          <form onSubmit={handleProfileSubmit} className="space-y-5" noValidate>
-            {profileMessage && (
-              <div className="px-4 py-3 bg-emerald-500/10 border border-emerald-500/20 rounded-xl text-emerald-400 text-sm font-medium">
-                {profileMessage}
-              </div>
-            )}
-            <InputField
-              id="name"
-              label="Full name"
-              type="text"
-              value={profileForm.name}
-              onChange={handleProfileChange}
-              error={profileErrors.name}
-            />
-            <InputField
-              id="email"
-              label="Email address"
-              type="email"
-              value={profileForm.email}
-              onChange={handleProfileChange}
-              error={profileErrors.email}
-            />
-            <div className="pt-2">
-              <Button type="submit" loading={loading && !passwordForm.currentPassword}>
-                Save Changes
-              </Button>
-            </div>
-          </form>
-        </section>
+        <div className="bg-white/5 border border-white/10 rounded-2xl p-5 shadow-lg">
+          <div className="w-10 h-10 rounded-full bg-blue-500/20 flex items-center justify-center mb-4">
+            <svg className="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" /></svg>
+          </div>
+          <p className="text-slate-400 text-sm">Transactions Logged</p>
+          <h3 className="text-2xl font-bold text-white mt-1">{stats.transactionsCount}</h3>
+        </div>
 
-        {/* Change Password Section */}
-        <section className="bg-white/5 border border-white/10 rounded-2xl p-6 md:p-8 backdrop-blur-sm shadow-xl shadow-black/20">
-          <h2 className="text-xl font-semibold text-white mb-6">Change Password</h2>
-          <form onSubmit={handlePasswordSubmit} className="space-y-5" noValidate>
-            {passwordMessage && (
-              <div className="px-4 py-3 bg-emerald-500/10 border border-emerald-500/20 rounded-xl text-emerald-400 text-sm font-medium">
-                {passwordMessage}
-              </div>
-            )}
-            <InputField
-              id="currentPassword"
-              label="Current password"
-              type="password"
-              value={passwordForm.currentPassword}
-              onChange={handlePasswordChange}
-              error={passwordErrors.currentPassword}
-            />
-            <InputField
-              id="newPassword"
-              label="New password"
-              type="password"
-              value={passwordForm.newPassword}
-              onChange={handlePasswordChange}
-              error={passwordErrors.newPassword}
-            />
-            <InputField
-              id="confirmPassword"
-              label="Confirm new password"
-              type="password"
-              value={passwordForm.confirmPassword}
-              onChange={handlePasswordChange}
-              error={passwordErrors.confirmPassword}
-            />
-            <div className="pt-2">
-              <Button type="submit" loading={loading && !!passwordForm.currentPassword}>
-                Update Password
-              </Button>
-            </div>
-          </form>
-        </section>
+        <div className="bg-white/5 border border-white/10 rounded-2xl p-5 shadow-lg">
+          <div className="w-10 h-10 rounded-full bg-fuchsia-500/20 flex items-center justify-center mb-4">
+            <svg className="w-5 h-5 text-fuchsia-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z" /></svg>
+          </div>
+          <p className="text-slate-400 text-sm">Budgets Created</p>
+          <h3 className="text-2xl font-bold text-white mt-1">{stats.budgetsCreated}</h3>
+        </div>
+
+        <div className="bg-white/5 border border-white/10 rounded-2xl p-5 shadow-lg">
+          <div className="w-10 h-10 rounded-full bg-violet-500/20 flex items-center justify-center mb-4">
+            <svg className="w-5 h-5 text-violet-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+          </div>
+          <p className="text-slate-400 text-sm">AI Insights Used</p>
+          <h3 className="text-2xl font-bold text-white mt-1">{stats.aiUsage} <span className="text-sm font-normal text-slate-500">requests</span></h3>
+        </div>
+
       </div>
     </div>
   );

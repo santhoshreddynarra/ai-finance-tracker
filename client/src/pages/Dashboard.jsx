@@ -58,26 +58,57 @@ const Dashboard = () => {
 
       {/* Top Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-white/5 border border-white/10 rounded-2xl p-5 backdrop-blur-sm shadow-xl">
-          <p className="text-slate-400 text-sm font-medium mb-1">Total Income</p>
-          <h3 className="text-2xl font-bold text-emerald-400">{formatCurrency(summary.totalIncome)}</h3>
+        <div className="bg-white/5 border border-white/10 rounded-3xl p-6 relative overflow-hidden group">
+          <div className="absolute top-0 right-0 w-24 h-24 bg-emerald-500/10 blur-2xl rounded-full transition-transform group-hover:scale-150" />
+          <p className="text-sm font-medium text-slate-400 mb-1">Total Income</p>
+          <h3 className="text-3xl font-bold text-white tracking-tight">{formatCurrency(data.summary.totalIncome)}</h3>
+          <div className="flex items-center gap-3 mt-4">
+            <div className="w-8 h-8 rounded-full bg-emerald-500/20 flex items-center justify-center">
+              <svg className="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" /></svg>
+            </div>
+            <div>
+              <p className="text-xs text-slate-400">Highest</p>
+              <p className="text-sm font-medium text-emerald-400">{formatCurrency(data.summary.highestIncome || 0)}</p>
+            </div>
+          </div>
         </div>
-        <div className="bg-white/5 border border-white/10 rounded-2xl p-5 backdrop-blur-sm shadow-xl">
-          <p className="text-slate-400 text-sm font-medium mb-1">Total Expense</p>
-          <h3 className="text-2xl font-bold text-rose-400">{formatCurrency(summary.totalExpense)}</h3>
+        
+        <div className="bg-white/5 border border-white/10 rounded-3xl p-6 relative overflow-hidden group">
+          <div className="absolute top-0 right-0 w-24 h-24 bg-rose-500/10 blur-2xl rounded-full transition-transform group-hover:scale-150" />
+          <p className="text-sm font-medium text-slate-400 mb-1">Total Expenses</p>
+          <h3 className="text-3xl font-bold text-white tracking-tight">{formatCurrency(data.summary.totalExpense)}</h3>
+          <div className="flex items-center gap-3 mt-4">
+            <div className="w-8 h-8 rounded-full bg-rose-500/20 flex items-center justify-center">
+              <svg className="w-4 h-4 text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6" /></svg>
+            </div>
+            <div>
+              <p className="text-xs text-slate-400">Largest</p>
+              <p className="text-sm font-medium text-rose-400">{formatCurrency(data.summary.largestExpense || 0)}</p>
+            </div>
+          </div>
         </div>
-        <div className="bg-white/5 border border-white/10 rounded-2xl p-5 backdrop-blur-sm shadow-xl">
-          <p className="text-slate-400 text-sm font-medium mb-1">Total Savings</p>
-          <h3 className={`text-2xl font-bold ${summary.totalSavings >= 0 ? 'text-indigo-400' : 'text-rose-400'}`}>
-            {formatCurrency(summary.totalSavings)}
+        
+        <div className="bg-white/5 border border-white/10 rounded-3xl p-6 relative overflow-hidden group">
+          <div className="absolute top-0 right-0 w-24 h-24 bg-violet-500/10 blur-2xl rounded-full transition-transform group-hover:scale-150" />
+          <p className="text-sm font-medium text-slate-400 mb-1">Total Balance</p>
+          <h3 className={`text-3xl font-bold tracking-tight ${data.summary.totalSavings >= 0 ? "text-white" : "text-rose-400"}`}>
+            {formatCurrency(data.summary.totalSavings)}
           </h3>
+          <div className="flex items-center gap-3 mt-4">
+            <div className="w-8 h-8 rounded-full bg-violet-500/20 flex items-center justify-center">
+              <svg className="w-4 h-4 text-violet-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+            </div>
+            <div>
+              <p className="text-xs text-slate-400">Avg. Daily Spend</p>
+              <p className="text-sm font-medium text-violet-400">{formatCurrency(data.summary.averageDailySpending || 0)}</p>
+            </div>
+          </div>
         </div>
-        <div className="bg-white/5 border border-white/10 rounded-2xl p-5 backdrop-blur-sm shadow-xl">
-          <p className="text-slate-400 text-sm font-medium mb-1">Remaining Budget</p>
-          <h3 className="text-2xl font-bold text-white">{formatCurrency(summary.remainingBudget)}</h3>
-          {summary.monthlyBudget > 0 && (
-            <p className="text-xs text-slate-500 mt-1">out of {formatCurrency(summary.monthlyBudget)}</p>
-          )}
+        
+        <div className="bg-white/5 border border-white/10 rounded-3xl p-6 relative overflow-hidden group">
+          <div className="absolute top-0 right-0 w-24 h-24 bg-blue-500/10 blur-2xl rounded-full transition-transform group-hover:scale-150" />
+          <p className="text-sm font-medium text-slate-400 mb-1">Remaining Budget</p>
+          <h3 className="text-3xl font-bold text-white tracking-tight">{formatCurrency(data.summary.remainingBudget || 0)}</h3>
         </div>
       </div>
 
