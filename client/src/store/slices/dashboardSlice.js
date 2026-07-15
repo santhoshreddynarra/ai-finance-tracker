@@ -3,7 +3,7 @@ import api from "../../services/api";
 
 export const fetchDashboardData = createAsyncThunk("dashboard/fetch", async (_, { rejectWithValue }) => {
   try {
-    const res = await api.get("/analytics/dashboard");
+    const res = await api.get("/dashboard/summary");
     return res.data.data;
   } catch (err) {
     return rejectWithValue(err.response?.data?.message || "Failed to fetch dashboard data");

@@ -12,7 +12,9 @@ import {
   PieChart,
   Pie,
   Cell,
-  Legend
+  Legend,
+  LineChart,
+  Line
 } from "recharts";
 
 const COLORS = ["#8b5cf6", "#ec4899", "#f43f5e", "#f59e0b", "#10b981", "#3b82f6", "#6366f1", "#8b5cf6"];
@@ -67,8 +69,8 @@ const Dashboard = () => {
               <svg className="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" /></svg>
             </div>
             <div>
-              <p className="text-xs text-slate-400">Highest</p>
-              <p className="text-sm font-medium text-emerald-400">{formatCurrency(data.summary.highestIncome || 0)}</p>
+              <p className="text-xs text-slate-400">Total Transactions</p>
+              <p className="text-sm font-medium text-emerald-400">{recentTransactions.length > 0 ? recentTransactions.length + '+' : 0}</p>
             </div>
           </div>
         </div>
@@ -82,7 +84,7 @@ const Dashboard = () => {
               <svg className="w-4 h-4 text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6" /></svg>
             </div>
             <div>
-              <p className="text-xs text-slate-400">Largest</p>
+              <p className="text-xs text-slate-400">Largest Expense</p>
               <p className="text-sm font-medium text-rose-400">{formatCurrency(data.summary.largestExpense || 0)}</p>
             </div>
           </div>
@@ -99,8 +101,12 @@ const Dashboard = () => {
               <svg className="w-4 h-4 text-violet-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
             </div>
             <div>
-              <p className="text-xs text-slate-400">Avg. Daily Spend</p>
-              <p className="text-sm font-medium text-violet-400">{formatCurrency(data.summary.averageDailySpending || 0)}</p>
+              <p className="text-xs text-slate-400">Current Savings Rate</p>
+              <p className="text-sm font-medium text-violet-400">
+                {data.summary.totalIncome > 0 
+                  ? ((data.summary.totalSavings / data.summary.totalIncome) * 100).toFixed(1) + "%" 
+                  : "0%"}
+              </p>
             </div>
           </div>
         </div>
@@ -109,34 +115,67 @@ const Dashboard = () => {
           <div className="absolute top-0 right-0 w-24 h-24 bg-blue-500/10 blur-2xl rounded-full transition-transform group-hover:scale-150" />
           <p className="text-sm font-medium text-slate-400 mb-1">Remaining Budget</p>
           <h3 className="text-3xl font-bold text-white tracking-tight">{formatCurrency(data.summary.remainingBudget || 0)}</h3>
+          <div className="flex items-center gap-3 mt-4">
+            <div className="w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center">
+              <svg className="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+            </div>
+            <div>
+              <p className="text-xs text-slate-400">Highest Spending Category</p>
+              <p className="text-sm font-medium text-blue-400">{categoryBreakdown[0]?.name || "None"}</p>
+            </div>
+          </div>
         </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Monthly Trend Chart */}
-        <div className="lg:col-span-2 bg-white/5 border border-white/10 rounded-2xl p-5 backdrop-blur-sm shadow-xl flex flex-col">
-          <h3 className="text-white font-semibold mb-6">Monthly Trend</h3>
-          {monthlyTrend.length > 0 ? (
-            <div className="flex-1 min-h-[300px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={monthlyTrend} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" vertical={false} />
-                  <XAxis dataKey="month" stroke="#94a3b8" fontSize={12} tickLine={false} axisLine={false} />
-                  <YAxis stroke="#94a3b8" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `₹${value / 1000}k`} />
-                  <Tooltip 
-                    cursor={{fill: '#ffffff05'}}
-                    contentStyle={{ backgroundColor: '#11111a', borderColor: '#ffffff10', borderRadius: '12px' }}
-                    itemStyle={{ color: '#fff' }}
-                  />
-                  <Legend iconType="circle" wrapperStyle={{ fontSize: '12px', paddingTop: '10px' }}/>
-                  <Bar dataKey="income" name="Income" fill="#10b981" radius={[4, 4, 0, 0]} barSize={30} />
-                  <Bar dataKey="expense" name="Expense" fill="#f43f5e" radius={[4, 4, 0, 0]} barSize={30} />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          ) : (
-            <div className="flex-1 flex items-center justify-center text-slate-500 text-sm">No trend data available</div>
-          )}
+        <div className="lg:col-span-2 space-y-6">
+          <div className="bg-white/5 border border-white/10 rounded-2xl p-5 backdrop-blur-sm shadow-xl flex flex-col">
+            <h3 className="text-white font-semibold mb-6">Monthly Income vs Expense</h3>
+            {monthlyTrend.length > 0 ? (
+              <div className="w-full min-h-[250px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={monthlyTrend} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" vertical={false} />
+                    <XAxis dataKey="month" stroke="#94a3b8" fontSize={12} tickLine={false} axisLine={false} />
+                    <YAxis stroke="#94a3b8" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `₹${value / 1000}k`} />
+                    <Tooltip 
+                      cursor={{fill: '#ffffff05'}}
+                      contentStyle={{ backgroundColor: '#11111a', borderColor: '#ffffff10', borderRadius: '12px' }}
+                      itemStyle={{ color: '#fff' }}
+                    />
+                    <Legend iconType="circle" wrapperStyle={{ fontSize: '12px', paddingTop: '10px' }}/>
+                    <Bar dataKey="income" name="Income" fill="#10b981" radius={[4, 4, 0, 0]} barSize={20} />
+                    <Bar dataKey="expense" name="Expense" fill="#f43f5e" radius={[4, 4, 0, 0]} barSize={20} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            ) : (
+              <div className="w-full min-h-[250px] flex items-center justify-center text-slate-500 text-sm">No trend data available</div>
+            )}
+          </div>
+
+          <div className="bg-white/5 border border-white/10 rounded-2xl p-5 backdrop-blur-sm shadow-xl flex flex-col">
+            <h3 className="text-white font-semibold mb-6">Monthly Spending Trend</h3>
+            {monthlyTrend.length > 0 ? (
+              <div className="w-full min-h-[250px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={monthlyTrend} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" vertical={false} />
+                    <XAxis dataKey="month" stroke="#94a3b8" fontSize={12} tickLine={false} axisLine={false} />
+                    <YAxis stroke="#94a3b8" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `₹${value / 1000}k`} />
+                    <Tooltip 
+                      contentStyle={{ backgroundColor: '#11111a', borderColor: '#ffffff10', borderRadius: '12px' }}
+                      itemStyle={{ color: '#fff' }}
+                    />
+                    <Line type="monotone" dataKey="expense" name="Spending" stroke="#3b82f6" strokeWidth={3} dot={{ r: 4, fill: '#3b82f6', strokeWidth: 2 }} activeDot={{ r: 6 }} />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+            ) : (
+              <div className="w-full min-h-[250px] flex items-center justify-center text-slate-500 text-sm">No trend data available</div>
+            )}
+          </div>
         </div>
 
         {/* Expense Category Breakdown */}

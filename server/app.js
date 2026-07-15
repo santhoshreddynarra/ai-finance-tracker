@@ -12,6 +12,7 @@ import budgetRoutes from "./routes/budgetRoutes.js";
 import analyticsRoutes from "./routes/analyticsRoutes.js";
 import aiRoutes from "./routes/aiRoutes.js";
 import reportRoutes from "./routes/reportRoutes.js";
+import dashboardRoutes from "./routes/dashboardRoutes.js";
 
 
 const app = express();
@@ -46,6 +47,7 @@ app.use("/api/budgets", budgetRoutes);
 app.use("/api/analytics", analyticsRoutes);
 app.use("/api/ai", aiRoutes);
 app.use("/api/reports", reportRoutes);
+app.use("/api/dashboard", dashboardRoutes);
 
 
 // ── Error Handling ───────────────────────────
