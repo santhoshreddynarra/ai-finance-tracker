@@ -4,7 +4,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { logout } from "../../store/slices/authSlice";
 
 const navigation = [
-  { name: "Dashboard", href: "/dashboard", disabled: true },
+  { name: "Dashboard", href: "/dashboard", disabled: false },
   { name: "Transactions", href: "/transactions", disabled: false },
   { name: "Categories", href: "/categories", disabled: false },
   { name: "Budget", href: "/budget", disabled: false },
