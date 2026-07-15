@@ -10,6 +10,7 @@ import Profile from "./pages/Profile";
 import Transactions from "./pages/Transactions";
 import Categories from "./pages/Categories";
 import Budget from "./pages/Budget";
+import AIInsights from "./pages/AIInsights";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 import DashboardLayout from "./components/layout/DashboardLayout";
 
@@ -28,6 +29,7 @@ const App = () => {
             <Route path="/transactions" element={<DashboardLayout><Transactions /></DashboardLayout>} />
             <Route path="/categories" element={<DashboardLayout><Categories /></DashboardLayout>} />
             <Route path="/budget" element={<DashboardLayout><Budget /></DashboardLayout>} />
+            <Route path="/ai" element={<DashboardLayout><AIInsights /></DashboardLayout>} />
             <Route path="/profile" element={<DashboardLayout><Profile /></DashboardLayout>} />
           </Route>
 

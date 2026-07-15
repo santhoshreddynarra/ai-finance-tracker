@@ -9,7 +9,7 @@ const navigation = [
   { name: "Categories", href: "/categories", disabled: false },
   { name: "Budget", href: "/budget", disabled: false },
   { name: "Reports", href: "/reports", disabled: true },
-  { name: "AI Insights", href: "/ai", disabled: true },
+  { name: "AI Insights", href: "/ai", disabled: false },
   { name: "Profile", href: "/profile", disabled: false },
 ];
 

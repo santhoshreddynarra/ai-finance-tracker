@@ -4,6 +4,7 @@ import transactionReducer from "./slices/transactionSlice";
 import categoryReducer from "./slices/categorySlice";
 import budgetReducer from "./slices/budgetSlice";
 import dashboardReducer from "./slices/dashboardSlice";
+import aiReducer from "./slices/aiSlice";
 
 const store = configureStore({
   reducer: {
@@ -12,6 +13,7 @@ const store = configureStore({
     categories: categoryReducer,
     budgets: budgetReducer,
     dashboard: dashboardReducer,
+    ai: aiReducer,
   },
 });
 
