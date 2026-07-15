@@ -1,50 +1,63 @@
 import Budget from "../models/Budget.js";
 
-// @desc    Get all budgets for user
+// @desc    Get user's budget
 // @route   GET /api/budgets
 // @access  Private
-export const getBudgets = async (req, res) => {
+export const getBudget = async (req, res) => {
   try {
-    const budgets = await Budget.find({ userId: req.user._id });
-    res.status(200).json({
+    const budget = await Budget.findOne({ userId: req.user._id });
+    
+    // If no budget is found, return a default empty state
+    if (!budget) {
+      return res.status(200).json({
+        success: true,
+        data: {
+          monthlyBudget: 0,
+          categoryBudgets: [],
+        },
+      });
+    }
+
+    return res.status(200).json({
       success: true,
-      data: budgets,
+      data: budget,
     });
   } catch (err) {
-    console.error("Get budgets error:", err);
-    res.status(500).json({ success: false, message: "Server Error" });
+    console.error("Get budget error:", err);
+    return res.status(500).json({ success: false, message: "Server Error" });
   }
 };
 
-// @desc    Create or update a budget for a category
+// @desc    Upsert user's budget (Create or Update)
 // @route   POST /api/budgets
 // @access  Private
 export const upsertBudget = async (req, res) => {
   try {
-    const { category, amount, period } = req.body;
+    const { monthlyBudget, categoryBudgets } = req.body;
 
-    if (!category || !amount) {
-      return res.status(400).json({ success: false, message: "Please provide category and amount" });
+    if (monthlyBudget === undefined) {
+      return res.status(400).json({ success: false, message: "Please provide a monthlyBudget" });
     }
 
-    let budget = await Budget.findOne({ userId: req.user._id, category });
+    let budget = await Budget.findOne({ userId: req.user._id });
 
     if (budget) {
-      // Update existing budget
-      budget.amount = amount;
-      if (period) budget.period = period;
+      // Update existing
+      budget.monthlyBudget = monthlyBudget;
+      if (categoryBudgets) {
+        budget.categoryBudgets = categoryBudgets;
+      }
       await budget.save();
     } else {
-      // Create new budget
+      // Create new
       budget = await Budget.create({
         userId: req.user._id,
-        category,
-        amount,
-        period: period || "monthly",
+        monthlyBudget,
+        categoryBudgets: categoryBudgets || [],
       });
     }
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       data: budget,
     });
@@ -54,33 +67,6 @@ export const upsertBudget = async (req, res) => {
       return res.status(400).json({ success: false, message: messages.join(". ") });
     }
     console.error("Upsert budget error:", err);
-    res.status(500).json({ success: false, message: "Server Error" });
-  }
-};
-
-// @desc    Delete a budget
-// @route   DELETE /api/budgets/:id
-// @access  Private
-export const deleteBudget = async (req, res) => {
-  try {
-    const budget = await Budget.findById(req.params.id);
-
-    if (!budget) {
-      return res.status(404).json({ success: false, message: "Budget not found" });
-    }
-
-    if (budget.userId.toString() !== req.user._id.toString()) {
-      return res.status(401).json({ success: false, message: "Not authorized to delete this budget" });
-    }
-
-    await budget.deleteOne();
-
-    res.status(200).json({
-      success: true,
-      message: "Budget deleted",
-    });
-  } catch (err) {
-    console.error("Delete budget error:", err);
-    res.status(500).json({ success: false, message: "Server Error" });
+    return res.status(500).json({ success: false, message: "Server Error" });
   }
 };

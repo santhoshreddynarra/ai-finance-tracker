@@ -1,16 +1,11 @@
 import { Router } from "express";
-import {
-  getBudget,
-  upsertBudget,
-} from "../controllers/budgetController.js";
+import { getDashboardData } from "../controllers/analyticsController.js";
 import { protect } from "../middleware/authMiddleware.js";
 
 const router = Router();
 
 router.use(protect);
 
-router.route("/")
-  .get(getBudget)
-  .post(upsertBudget);
+router.get("/dashboard", getDashboardData);
 
 export default router;

@@ -1,68 +1,55 @@
 import Transaction from "../models/Transaction.js";
+import Budget from "../models/Budget.js";
 
-// ─────────────────────────────────────────────
-// @desc    Get top-level dashboard summary (Income, Expense, Balance)
-// @route   GET /api/analytics/summary
+// @desc    Get complete dashboard analytics data
+// @route   GET /api/analytics/dashboard
 // @access  Private
-// ─────────────────────────────────────────────
-export const getDashboardSummary = async (req, res) => {
+export const getDashboardData = async (req, res) => {
   try {
     const userId = req.user._id;
 
+    // Get the current month and year for monthly calculations
+    const now = new Date();
+    const currentMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+    
+    // 1. Get Top-Level Summary (Income, Expense, Savings) for the current month
     const summary = await Transaction.aggregate([
-      { $match: { userId } },
+      { 
+        $match: { 
+          userId,
+          transactionDate: { $gte: currentMonthStart }
+        } 
+      },
       {
         $group: {
           _id: null,
           totalIncome: {
-            $sum: {
-              $cond: [{ $eq: ["$type", "income"] }, "$amount", 0],
-            },
+            $sum: { $cond: [{ $eq: ["$type", "income"] }, "$amount", 0] },
           },
           totalExpense: {
-            $sum: {
-              $cond: [{ $eq: ["$type", "expense"] }, "$amount", 0],
-            },
+            $sum: { $cond: [{ $eq: ["$type", "expense"] }, "$amount", 0] },
           },
         },
       },
     ]);
 
     const stats = summary[0] || { totalIncome: 0, totalExpense: 0 };
-    const netBalance = stats.totalIncome - stats.totalExpense;
-    
-    let savingsRate = 0;
-    if (stats.totalIncome > 0) {
-      savingsRate = ((stats.totalIncome - stats.totalExpense) / stats.totalIncome) * 100;
-      if (savingsRate < 0) savingsRate = 0;
-    }
+    const totalSavings = stats.totalIncome - stats.totalExpense;
 
-    return res.status(200).json({
-      success: true,
-      data: {
-        totalIncome: stats.totalIncome,
-        totalExpense: stats.totalExpense,
-        netBalance,
-        savingsRate: parseFloat(savingsRate.toFixed(2)),
-      },
-    });
-  } catch (err) {
-    console.error("Analytics summary error:", err);
-    return res.status(500).json({ success: false, message: "Server Error" });
-  }
-};
+    // 2. Fetch User Budget to calculate Remaining Budget
+    const userBudget = await Budget.findOne({ userId });
+    const monthlyBudget = userBudget ? userBudget.monthlyBudget : 0;
+    const remainingBudget = Math.max(0, monthlyBudget - stats.totalExpense);
 
-// ─────────────────────────────────────────────
-// @desc    Get expense grouped by category
-// @route   GET /api/analytics/category
-// @access  Private
-// ─────────────────────────────────────────────
-export const getExpenseByCategory = async (req, res) => {
-  try {
-    const userId = req.user._id;
-
+    // 3. Category Breakdown (Expenses for current month)
     const categoryData = await Transaction.aggregate([
-      { $match: { userId, type: "expense" } },
+      { 
+        $match: { 
+          userId, 
+          type: "expense",
+          transactionDate: { $gte: currentMonthStart } 
+        } 
+      },
       {
         $group: {
           _id: "$category",
@@ -72,34 +59,17 @@ export const getExpenseByCategory = async (req, res) => {
       { $sort: { totalAmount: -1 } },
     ]);
 
-    const formattedData = categoryData.map(item => ({
-      category: item._id,
-      amount: item.totalAmount
+    const categoryBreakdown = categoryData.map(item => ({
+      name: item._id,
+      value: item.totalAmount
     }));
 
-    return res.status(200).json({
-      success: true,
-      data: formattedData,
-    });
-  } catch (err) {
-    console.error("Analytics category error:", err);
-    return res.status(500).json({ success: false, message: "Server Error" });
-  }
-};
-
-// ─────────────────────────────────────────────
-// @desc    Get monthly income/expense trends
-// @route   GET /api/analytics/trends
-// @access  Private
-// ─────────────────────────────────────────────
-export const getMonthlyTrends = async (req, res) => {
-  try {
-    const userId = req.user._id;
-
-    // We'll get data for the last 6 months
+    // 4. Monthly Trend (Last 6 Months)
     const sixMonthsAgo = new Date();
-    sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
-    
+    sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 5); // 6 months including current
+    sixMonthsAgo.setDate(1);
+    sixMonthsAgo.setHours(0, 0, 0, 0);
+
     const trends = await Transaction.aggregate([
       { 
         $match: { 
@@ -124,7 +94,7 @@ export const getMonthlyTrends = async (req, res) => {
       { $sort: { "_id.year": 1, "_id.month": 1 } }
     ]);
 
-    const formattedTrends = trends.map(item => {
+    const monthlyTrend = trends.map(item => {
       const date = new Date(item._id.year, item._id.month - 1);
       return {
         month: date.toLocaleString('default', { month: 'short' }),
@@ -133,33 +103,29 @@ export const getMonthlyTrends = async (req, res) => {
       };
     });
 
-    return res.status(200).json({
-      success: true,
-      data: formattedTrends,
-    });
-  } catch (err) {
-    console.error("Analytics trends error:", err);
-    return res.status(500).json({ success: false, message: "Server Error" });
-  }
-};
-
-// ─────────────────────────────────────────────
-// @desc    Get recent transactions
-// @route   GET /api/analytics/recent
-// @access  Private
-// ─────────────────────────────────────────────
-export const getRecentTransactions = async (req, res) => {
-  try {
-    const transactions = await Transaction.find({ userId: req.user._id })
-      .sort({ transactionDate: -1 })
+    // 5. Last 5 Transactions
+    const recentTransactions = await Transaction.find({ userId })
+      .sort({ transactionDate: -1, createdAt: -1 })
       .limit(5);
 
+    // Combine and send response
     return res.status(200).json({
       success: true,
-      data: transactions,
+      data: {
+        summary: {
+          totalIncome: stats.totalIncome,
+          totalExpense: stats.totalExpense,
+          totalSavings,
+          monthlyBudget,
+          remainingBudget
+        },
+        categoryBreakdown,
+        monthlyTrend,
+        recentTransactions,
+      },
     });
   } catch (err) {
-    console.error("Analytics recent transactions error:", err);
+    console.error("Dashboard Analytics error:", err);
     return res.status(500).json({ success: false, message: "Server Error" });
   }
 };
