@@ -1,58 +1,230 @@
-import React from "react";
-import { useSelector } from "react-redux";
+import React, { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchDashboardData } from "../store/slices/dashboardSlice";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
+  Legend
+} from "recharts";
 
-/**
- * Temporary dashboard placeholder — replaced in a future phase
- * with charts, transactions, budgets, and AI insights.
- */
+const COLORS = ["#8b5cf6", "#ec4899", "#f43f5e", "#f59e0b", "#10b981", "#3b82f6", "#6366f1", "#8b5cf6"];
+
 const Dashboard = () => {
+  const dispatch = useDispatch();
+  const { data, loading } = useSelector((state) => state.dashboard);
   const { user } = useSelector((state) => state.auth);
 
+  useEffect(() => {
+    dispatch(fetchDashboardData());
+  }, [dispatch]);
+
+  if (loading || !data.summary) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="w-8 h-8 border-4 border-violet-500 border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    );
+  }
+
+  const { summary, categoryBreakdown, monthlyTrend, recentTransactions } = data;
+
+  const formatCurrency = (value) => {
+    return `₹${value.toLocaleString("en-IN")}`;
+  };
+
+  const formatDate = (dateString) => {
+    return new Date(dateString).toLocaleDateString("en-IN", {
+      day: "numeric", month: "short", year: "numeric"
+    });
+  };
+
   return (
-    <div className="relative">
-      {/* Fixed ambient blobs */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -left-40 w-96 h-96 bg-violet-700/10 rounded-full blur-3xl" />
-        <div className="absolute top-1/2 right-0 w-72 h-72 bg-indigo-700/10 rounded-full blur-3xl" />
+    <div className="space-y-6 pb-12 relative max-w-7xl mx-auto">
+      {/* Header */}
+      <div>
+        <h1 className="text-2xl font-bold text-white tracking-tight">
+          Welcome back, <span className="bg-gradient-to-r from-violet-400 to-indigo-400 bg-clip-text text-transparent">{user?.name?.split(' ')[0]}</span>
+        </h1>
+        <p className="text-slate-400 text-sm mt-1">Here is your financial overview for this month.</p>
       </div>
 
+      {/* Top Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="bg-white/5 border border-white/10 rounded-2xl p-5 backdrop-blur-sm shadow-xl">
+          <p className="text-slate-400 text-sm font-medium mb-1">Total Income</p>
+          <h3 className="text-2xl font-bold text-emerald-400">{formatCurrency(summary.totalIncome)}</h3>
+        </div>
+        <div className="bg-white/5 border border-white/10 rounded-2xl p-5 backdrop-blur-sm shadow-xl">
+          <p className="text-slate-400 text-sm font-medium mb-1">Total Expense</p>
+          <h3 className="text-2xl font-bold text-rose-400">{formatCurrency(summary.totalExpense)}</h3>
+        </div>
+        <div className="bg-white/5 border border-white/10 rounded-2xl p-5 backdrop-blur-sm shadow-xl">
+          <p className="text-slate-400 text-sm font-medium mb-1">Total Savings</p>
+          <h3 className={`text-2xl font-bold ${summary.totalSavings >= 0 ? 'text-indigo-400' : 'text-rose-400'}`}>
+            {formatCurrency(summary.totalSavings)}
+          </h3>
+        </div>
+        <div className="bg-white/5 border border-white/10 rounded-2xl p-5 backdrop-blur-sm shadow-xl">
+          <p className="text-slate-400 text-sm font-medium mb-1">Remaining Budget</p>
+          <h3 className="text-2xl font-bold text-white">{formatCurrency(summary.remainingBudget)}</h3>
+          {summary.monthlyBudget > 0 && (
+            <p className="text-xs text-slate-500 mt-1">out of {formatCurrency(summary.monthlyBudget)}</p>
+          )}
+        </div>
+      </div>
 
-
-      <main className="relative pt-8 pb-12 px-4 sm:px-6 max-w-7xl mx-auto">
-        {/* Welcome */}
-        <div className="mb-10">
-          <h1 className="text-3xl sm:text-4xl font-bold text-white">
-            Welcome back,{" "}
-            <span className="bg-gradient-to-r from-violet-400 to-indigo-400 bg-clip-text text-transparent">
-              {user?.name ?? "there"}
-            </span>{" "}
-            👋
-          </h1>
-          <p className="text-slate-400 mt-2 text-sm sm:text-base">
-            Your AI-powered finance dashboard is on its way.
-          </p>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Monthly Trend Chart */}
+        <div className="lg:col-span-2 bg-white/5 border border-white/10 rounded-2xl p-5 backdrop-blur-sm shadow-xl flex flex-col">
+          <h3 className="text-white font-semibold mb-6">Monthly Trend</h3>
+          {monthlyTrend.length > 0 ? (
+            <div className="flex-1 min-h-[300px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={monthlyTrend} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" vertical={false} />
+                  <XAxis dataKey="month" stroke="#94a3b8" fontSize={12} tickLine={false} axisLine={false} />
+                  <YAxis stroke="#94a3b8" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `₹${value / 1000}k`} />
+                  <Tooltip 
+                    cursor={{fill: '#ffffff05'}}
+                    contentStyle={{ backgroundColor: '#11111a', borderColor: '#ffffff10', borderRadius: '12px' }}
+                    itemStyle={{ color: '#fff' }}
+                  />
+                  <Legend iconType="circle" wrapperStyle={{ fontSize: '12px', paddingTop: '10px' }}/>
+                  <Bar dataKey="income" name="Income" fill="#10b981" radius={[4, 4, 0, 0]} barSize={30} />
+                  <Bar dataKey="expense" name="Expense" fill="#f43f5e" radius={[4, 4, 0, 0]} barSize={30} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          ) : (
+            <div className="flex-1 flex items-center justify-center text-slate-500 text-sm">No trend data available</div>
+          )}
         </div>
 
-        {/* Coming soon card */}
-        <div className="bg-white/[0.03] border border-white/10 rounded-2xl p-10 flex flex-col items-center justify-center gap-4 text-center shadow-xl min-h-[280px]">
-          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-violet-500/20 to-indigo-600/20 border border-violet-500/20 flex items-center justify-center">
-            <svg className="w-8 h-8 text-violet-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
-                d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-            </svg>
+        {/* Expense Category Breakdown */}
+        <div className="bg-white/5 border border-white/10 rounded-2xl p-5 backdrop-blur-sm shadow-xl flex flex-col">
+          <h3 className="text-white font-semibold mb-2">Expense Breakdown</h3>
+          {categoryBreakdown.length > 0 ? (
+            <div className="flex-1 min-h-[300px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={categoryBreakdown}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={60}
+                    outerRadius={80}
+                    paddingAngle={5}
+                    dataKey="value"
+                    stroke="none"
+                  >
+                    {categoryBreakdown.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip 
+                    contentStyle={{ backgroundColor: '#11111a', borderColor: '#ffffff10', borderRadius: '12px' }}
+                    itemStyle={{ color: '#fff' }}
+                    formatter={(value) => formatCurrency(value)}
+                  />
+                  <Legend 
+                    layout="vertical" 
+                    verticalAlign="bottom" 
+                    align="center"
+                    iconType="circle"
+                    wrapperStyle={{ fontSize: '12px' }}
+                  />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+          ) : (
+            <div className="flex-1 flex items-center justify-center text-slate-500 text-sm">No expenses this month</div>
+          )}
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        
+        {/* Budget Status */}
+        <div className="lg:col-span-1 bg-white/5 border border-white/10 rounded-2xl p-5 backdrop-blur-sm shadow-xl">
+          <h3 className="text-white font-semibold mb-6">Budget Status</h3>
+          {summary.monthlyBudget > 0 ? (
+            <div className="space-y-4">
+              <div className="flex justify-between text-sm">
+                <span className="text-slate-400">Total Spent</span>
+                <span className="text-white font-medium">{((summary.totalExpense / summary.monthlyBudget) * 100).toFixed(0)}%</span>
+              </div>
+              <div className="w-full h-3 bg-white/10 rounded-full overflow-hidden">
+                <div 
+                  className={`h-full ${summary.totalExpense > summary.monthlyBudget ? 'bg-rose-500' : 'bg-violet-500'}`}
+                  style={{ width: `${Math.min((summary.totalExpense / summary.monthlyBudget) * 100, 100)}%` }}
+                />
+              </div>
+              <p className="text-xs text-slate-500 text-center">
+                {summary.totalExpense > summary.monthlyBudget 
+                  ? <span className="text-rose-400">You have exceeded your monthly budget</span>
+                  : `You can still spend ${formatCurrency(summary.remainingBudget)} this month`
+                }
+              </p>
+            </div>
+          ) : (
+            <div className="text-center py-6">
+              <p className="text-slate-400 text-sm mb-4">You haven't set a monthly budget yet.</p>
+              <a href="/budget" className="text-violet-400 hover:text-violet-300 text-sm font-medium">Set Budget &rarr;</a>
+            </div>
+          )}
+        </div>
+
+        {/* Recent Transactions */}
+        <div className="lg:col-span-2 bg-white/5 border border-white/10 rounded-2xl p-5 backdrop-blur-sm shadow-xl">
+          <div className="flex justify-between items-center mb-6">
+            <h3 className="text-white font-semibold">Recent Transactions</h3>
+            <a href="/transactions" className="text-violet-400 hover:text-violet-300 text-sm font-medium">View All</a>
           </div>
-          <div>
-            <h2 className="text-xl font-semibold text-white">Dashboard Coming Soon</h2>
-            <p className="text-slate-400 text-sm mt-1 max-w-sm">
-              Charts, transactions, budgets, and AI-powered insights will appear here in the next phase.
-            </p>
-          </div>
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-violet-500/10 border border-violet-500/20 text-violet-400 text-xs font-medium">
-            <span className="w-1.5 h-1.5 rounded-full bg-violet-400 animate-pulse" />
-            Authentication complete — next phase incoming
+          <div className="overflow-x-auto">
+            {recentTransactions.length > 0 ? (
+              <table className="w-full text-left">
+                <tbody>
+                  {recentTransactions.map(t => (
+                    <tr key={t._id} className="border-b border-white/5 last:border-0">
+                      <td className="py-3 pr-4">
+                        <div className="flex items-center gap-3">
+                          <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${t.type === 'income' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-rose-500/10 text-rose-400'}`}>
+                            {t.type === 'income' ? (
+                              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 11l5-5m0 0l5 5m-5-5v12" /></svg>
+                            ) : (
+                              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 13l-5 5m0 0l-5-5m5 5V6" /></svg>
+                            )}
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium text-white">{t.title}</p>
+                            <p className="text-xs text-slate-500">{t.category}</p>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="py-3 px-4 text-sm text-slate-400 whitespace-nowrap">
+                        {formatDate(t.transactionDate)}
+                      </td>
+                      <td className={`py-3 pl-4 text-right text-sm font-semibold whitespace-nowrap ${t.type === 'income' ? 'text-emerald-400' : 'text-white'}`}>
+                        {t.type === 'income' ? '+' : ''}{formatCurrency(t.amount)}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            ) : (
+              <div className="text-center py-6 text-slate-500 text-sm">No transactions yet</div>
+            )}
           </div>
         </div>
-      </main>
+      </div>
     </div>
   );
 };

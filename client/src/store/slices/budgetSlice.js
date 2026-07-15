@@ -1,16 +1,16 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import api from "../../services/api";
 
-export const fetchBudgets = createAsyncThunk("budgets/fetch", async (_, { rejectWithValue }) => {
+export const fetchBudget = createAsyncThunk("budget/fetch", async (_, { rejectWithValue }) => {
   try {
     const res = await api.get("/budgets");
     return res.data.data;
   } catch (err) {
-    return rejectWithValue(err.response?.data?.message || "Failed to fetch budgets");
+    return rejectWithValue(err.response?.data?.message || "Failed to fetch budget");
   }
 });
 
-export const upsertBudget = createAsyncThunk("budgets/upsert", async (formData, { rejectWithValue }) => {
+export const upsertBudget = createAsyncThunk("budget/upsert", async (formData, { rejectWithValue }) => {
   try {
     const res = await api.post("/budgets", formData);
     return res.data.data;
@@ -19,19 +19,13 @@ export const upsertBudget = createAsyncThunk("budgets/upsert", async (formData, 
   }
 });
 
-export const removeBudget = createAsyncThunk("budgets/remove", async (id, { rejectWithValue }) => {
-  try {
-    await api.delete(`/budgets/${id}`);
-    return id;
-  } catch (err) {
-    return rejectWithValue(err.response?.data?.message || "Failed to delete budget");
-  }
-});
-
 const budgetSlice = createSlice({
-  name: "budgets",
+  name: "budget",
   initialState: {
-    items: [],
+    data: {
+      monthlyBudget: 0,
+      categoryBudgets: [],
+    },
     loading: false,
     error: null,
   },
@@ -43,30 +37,27 @@ const budgetSlice = createSlice({
   extraReducers: (builder) => {
     builder
       // Fetch
-      .addCase(fetchBudgets.pending, (state) => {
+      .addCase(fetchBudget.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
-      .addCase(fetchBudgets.fulfilled, (state, action) => {
+      .addCase(fetchBudget.fulfilled, (state, action) => {
         state.loading = false;
-        state.items = action.payload;
+        state.data = action.payload;
       })
-      .addCase(fetchBudgets.rejected, (state, action) => {
+      .addCase(fetchBudget.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       })
       // Upsert
-      .addCase(upsertBudget.fulfilled, (state, action) => {
-        const index = state.items.findIndex(item => item._id === action.payload._id);
-        if (index !== -1) {
-          state.items[index] = action.payload;
-        } else {
-          state.items.push(action.payload);
-        }
+      .addCase(upsertBudget.pending, (state) => {
+        state.error = null;
       })
-      // Remove
-      .addCase(removeBudget.fulfilled, (state, action) => {
-        state.items = state.items.filter(item => item._id !== action.payload);
+      .addCase(upsertBudget.fulfilled, (state, action) => {
+        state.data = action.payload;
+      })
+      .addCase(upsertBudget.rejected, (state, action) => {
+        state.error = action.payload;
       });
   },
 });
