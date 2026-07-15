@@ -38,6 +38,10 @@ const userSchema = new mongoose.Schema(
       // Use .select("+password") explicitly when needed.
       select: false,
     },
+    preferences: {
+      theme: { type: String, enum: ["dark", "light"], default: "dark" },
+      currency: { type: String, default: "INR" }
+    }
   },
   {
     // Automatically adds createdAt and updatedAt fields

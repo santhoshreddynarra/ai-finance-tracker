@@ -41,13 +41,14 @@ export const createTransaction = async (req, res) => {
 // ─────────────────────────────────────────────
 export const getTransactions = async (req, res) => {
   try {
-    const { page = 1, limit = 10, type, category, startDate, endDate, search, sort } = req.query;
+    const { page = 1, limit = 10, type, category, startDate, endDate, search, sort, paymentMethod, minAmount, maxAmount } = req.query;
     
     // Build query object
     const query = { userId: req.user._id };
 
     if (type) query.type = type;
     if (category) query.category = category;
+    if (paymentMethod) query.paymentMethod = paymentMethod;
     
     if (startDate || endDate) {
       query.transactionDate = {};
@@ -55,11 +56,18 @@ export const getTransactions = async (req, res) => {
       if (endDate) query.transactionDate.$lte = new Date(endDate);
     }
 
+    if (minAmount || maxAmount) {
+      query.amount = {};
+      if (minAmount) query.amount.$gte = Number(minAmount);
+      if (maxAmount) query.amount.$lte = Number(maxAmount);
+    }
+
     if (search) {
       query.$or = [
         { title: { $regex: search, $options: "i" } },
         { category: { $regex: search, $options: "i" } },
-        { description: { $regex: search, $options: "i" } }
+        { description: { $regex: search, $options: "i" } },
+        { paymentMethod: { $regex: search, $options: "i" } }
       ];
     }
 

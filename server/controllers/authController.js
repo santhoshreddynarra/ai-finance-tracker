@@ -29,6 +29,7 @@ const sanitizeUser = (user) => ({
   id: user._id,
   name: user.name,
   email: user.email,
+  preferences: user.preferences,
   createdAt: user.createdAt,
   updatedAt: user.updatedAt,
 });
@@ -199,6 +200,9 @@ export const updateProfile = async (req, res) => {
 
     user.name = req.body.name || user.name;
     user.email = req.body.email || user.email;
+    if (req.body.preferences) {
+      user.preferences = { ...user.preferences, ...req.body.preferences };
+    }
 
     const updatedUser = await user.save();
 
@@ -273,5 +277,38 @@ export const changePassword = async (req, res) => {
       success: false,
       message: "Server error. Please try again later.",
     });
+  }
+};
+
+// ─────────────────────────────────────────────
+// @desc    Delete user account
+// @route   DELETE /api/auth/account
+// @access  Private
+// ─────────────────────────────────────────────
+export const deleteAccount = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id).select("+password");
+
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
+
+    // Verify password before deleting
+    if (!req.body.password || !(await user.matchPassword(req.body.password))) {
+      return res.status(401).json({ success: false, message: "Incorrect password." });
+    }
+
+    // Delete all associated data
+    const mongoose = (await import("mongoose")).default;
+    await mongoose.model("Transaction").deleteMany({ userId: user._id });
+    await mongoose.model("Budget").deleteMany({ userId: user._id });
+    await mongoose.model("Category").deleteMany({ userId: user._id });
+    
+    await user.deleteOne();
+
+    return res.status(200).json({ success: true, message: "Account deleted successfully." });
+  } catch (err) {
+    console.error("Delete account error:", err);
+    return res.status(500).json({ success: false, message: "Server error." });
   }
 };

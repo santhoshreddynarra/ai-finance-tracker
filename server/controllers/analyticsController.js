@@ -29,12 +29,23 @@ export const getDashboardData = async (req, res) => {
           totalExpense: {
             $sum: { $cond: [{ $eq: ["$type", "expense"] }, "$amount", 0] },
           },
+          highestIncome: {
+            $max: { $cond: [{ $eq: ["$type", "income"] }, "$amount", 0] },
+          },
+          largestExpense: {
+            $max: { $cond: [{ $eq: ["$type", "expense"] }, "$amount", 0] },
+          }
         },
       },
     ]);
 
-    const stats = summary[0] || { totalIncome: 0, totalExpense: 0 };
+    const stats = summary[0] || { totalIncome: 0, totalExpense: 0, highestIncome: 0, largestExpense: 0 };
     const totalSavings = stats.totalIncome - stats.totalExpense;
+
+    // Calculate Average Daily Spending
+    const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+    const currentDay = now.getDate();
+    const averageDailySpending = currentDay > 0 ? (stats.totalExpense / currentDay) : 0;
 
     // 2. Fetch User Budget to calculate Remaining Budget
     const userBudget = await Budget.findOne({ userId });
@@ -115,6 +126,9 @@ export const getDashboardData = async (req, res) => {
         summary: {
           totalIncome: stats.totalIncome,
           totalExpense: stats.totalExpense,
+          highestIncome: stats.highestIncome,
+          largestExpense: stats.largestExpense,
+          averageDailySpending,
           totalSavings,
           monthlyBudget,
           remainingBudget

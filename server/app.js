@@ -11,6 +11,8 @@ import categoryRoutes from "./routes/categoryRoutes.js";
 import budgetRoutes from "./routes/budgetRoutes.js";
 import analyticsRoutes from "./routes/analyticsRoutes.js";
 import aiRoutes from "./routes/aiRoutes.js";
+import reportRoutes from "./routes/reportRoutes.js";
+
 
 const app = express();
 
@@ -43,6 +45,8 @@ app.use("/api/categories", categoryRoutes);
 app.use("/api/budgets", budgetRoutes);
 app.use("/api/analytics", analyticsRoutes);
 app.use("/api/ai", aiRoutes);
+app.use("/api/reports", reportRoutes);
+
 
 // ── Error Handling ───────────────────────────
 app.use(notFound);

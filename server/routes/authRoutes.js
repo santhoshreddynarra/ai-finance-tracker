@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { signup, login, getCurrentUser, updateProfile, changePassword } from "../controllers/authController.js";
+import { signup, login, getCurrentUser, updateProfile, changePassword, deleteAccount } from "../controllers/authController.js";
 import { protect } from "../middleware/authMiddleware.js";
 
 const router = Router();
@@ -18,5 +18,8 @@ router.put("/profile", protect, updateProfile);
 
 // PUT /api/auth/password
 router.put("/password", protect, changePassword);
+
+// DELETE /api/auth/account
+router.delete("/account", protect, deleteAccount);
 
 export default router;
