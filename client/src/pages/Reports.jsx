@@ -94,7 +94,7 @@ const Reports = () => {
           <p className="text-slate-400 text-sm mt-1">Generate and export your financial reports.</p>
         </div>
         <div className="flex gap-2">
-          <Button onClick={() => handleDownload("csv")} variant="secondary" className="px-4 text-xs h-9">Export CSV</Button>
+          <Button onClick={() => handleDownload("csv")} variant="ghost" className="px-4 text-xs h-9">Export CSV</Button>
           <Button onClick={() => handleDownload("pdf")} className="px-4 text-xs h-9">Export PDF</Button>
         </div>
       </div>
