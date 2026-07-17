@@ -7,7 +7,6 @@ import Transaction from "../models/Transaction.js";
 // ─────────────────────────────────────────────
 export const createTransaction = async (req, res) => {
   try {
-    console.log("RECEIVED PAYLOAD:", req.body);
     let { type, title, amount, category, Category, paymentMethod, description, transactionDate } = req.body;
     category = category || Category;
 
