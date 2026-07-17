@@ -120,10 +120,18 @@ export const updateTransaction = async (req, res) => {
       return res.status(401).json({ success: false, message: "Not authorized to update this transaction" });
     }
 
+    // Whitelist allowed fields to prevent injection
+    const allowedFields = ["type", "title", "amount", "category", "paymentMethod", "description", "transactionDate"];
+    const updateData = {};
+    Object.keys(req.body).forEach(key => {
+      if (allowedFields.includes(key)) {
+        updateData[key] = req.body[key];
+      }
+    });
+
     // Handle potential category vs Category mismatch from frontend
-    const updateData = { ...req.body };
-    if (updateData.Category && !updateData.category) {
-      updateData.category = updateData.Category;
+    if (req.body.Category && !updateData.category) {
+      updateData.category = req.body.Category;
     }
 
     transaction = await Transaction.findByIdAndUpdate(
