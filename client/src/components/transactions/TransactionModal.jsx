@@ -38,11 +38,12 @@ const TransactionModal = ({ isOpen, onClose, transactionToEdit }) => {
       });
     } else {
       // Reset form
+      const expenseCategories = categories.filter(c => c.type === "expense");
       setForm({
         type: "expense",
         title: "",
         amount: "",
-        category: categories.length > 0 ? categories[0].name : "",
+        category: expenseCategories.length > 0 ? expenseCategories[0].name : "",
         paymentMethod: "Cash",
         description: "",
         transactionDate: new Date().toISOString().split("T")[0],

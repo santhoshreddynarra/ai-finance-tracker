@@ -1,5 +1,6 @@
 import jwt from "jsonwebtoken";
 import User from "../models/User.js";
+import Category from "../models/Category.js";
 
 // ─────────────────────────────────────────────
 // Private Helpers
@@ -65,6 +66,23 @@ export const signup = async (req, res) => {
 
     // 4. Create user — the model's pre-save hook handles password hashing
     const user = await User.create({ name, email, password });
+
+    // Seed default categories for this user
+    const defaultCategories = [
+      { name: 'Food', type: 'expense', isDefault: true, userId: user._id },
+      { name: 'Transport', type: 'expense', isDefault: true, userId: user._id },
+      { name: 'Shopping', type: 'expense', isDefault: true, userId: user._id },
+      { name: 'Bills', type: 'expense', isDefault: true, userId: user._id },
+      { name: 'Entertainment', type: 'expense', isDefault: true, userId: user._id },
+      { name: 'Healthcare', type: 'expense', isDefault: true, userId: user._id },
+      { name: 'Education', type: 'expense', isDefault: true, userId: user._id },
+      { name: 'Salary', type: 'income', isDefault: true, userId: user._id },
+      { name: 'Freelance', type: 'income', isDefault: true, userId: user._id },
+      { name: 'Investment', type: 'income', isDefault: true, userId: user._id },
+      { name: 'Others', type: 'expense', isDefault: true, userId: user._id },
+      { name: 'Others', type: 'income', isDefault: true, userId: user._id },
+    ];
+    await Category.insertMany(defaultCategories);
 
     // 5. Generate JWT
     const token = generateToken(user._id);
