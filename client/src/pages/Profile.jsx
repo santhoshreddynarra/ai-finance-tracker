@@ -15,9 +15,9 @@ const Profile = () => {
         const budgetRes = await api.get("/budgets");
         
         setStats({
-          transactionsCount: analyticsRes.data.data.categoryBreakdown.reduce((acc, curr) => acc + curr.count, 0) || 0,
+          transactionsCount: analyticsRes.data.data.summary.transactionsCount || 0,
           currentSavings: analyticsRes.data.data.summary.totalSavings || 0,
-          budgetsCreated: budgetRes.data.data.length || 0,
+          budgetsCreated: analyticsRes.data.data.summary.budgetsCreated || 0,
         });
       } catch (error) {
         console.error("Failed to load profile stats", error);

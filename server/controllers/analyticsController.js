@@ -120,6 +120,9 @@ export const getDashboardData = async (req, res) => {
       .limit(5);
 
     // Combine and send response
+    const transactionsCount = await Transaction.countDocuments({ userId });
+    const budgetsCreated = await Budget.countDocuments({ userId });
+
     return res.status(200).json({
       success: true,
       data: {
@@ -131,7 +134,9 @@ export const getDashboardData = async (req, res) => {
           averageDailySpending,
           totalSavings,
           monthlyBudget,
-          remainingBudget
+          remainingBudget,
+          transactionsCount,
+          budgetsCreated
         },
         categoryBreakdown,
         monthlyTrend,
