@@ -80,9 +80,10 @@ Create a `.env` file in the `server` directory:
 
 ```env
 PORT=5000
-MONGO_URI=your_mongodb_connection_string
+MONGODB_URI=your_mongodb_connection_string
 JWT_SECRET=your_jwt_secret
 JWT_EXPIRE=7d
+FRONTEND_URL=http://localhost:5173
 OPENAI_API_KEY=your_openai_api_key_here_or_leave_blank
 ```
 
