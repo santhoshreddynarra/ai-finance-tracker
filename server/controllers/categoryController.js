@@ -6,9 +6,33 @@ import Category from "../models/Category.js";
 export const getCategories = async (req, res) => {
   try {
     // Get custom categories for the user AND default categories (userId: null)
-    const categories = await Category.find({
+    let categories = await Category.find({
       $or: [{ userId: req.user._id }, { isDefault: true }],
     }).sort({ type: 1, name: 1 });
+
+    if (categories.length === 0) {
+      // Seed default categories for this user if none exist
+      const defaultCategories = [
+        { name: 'Food', type: 'expense', isDefault: true, userId: req.user._id },
+        { name: 'Transport', type: 'expense', isDefault: true, userId: req.user._id },
+        { name: 'Shopping', type: 'expense', isDefault: true, userId: req.user._id },
+        { name: 'Bills', type: 'expense', isDefault: true, userId: req.user._id },
+        { name: 'Entertainment', type: 'expense', isDefault: true, userId: req.user._id },
+        { name: 'Healthcare', type: 'expense', isDefault: true, userId: req.user._id },
+        { name: 'Education', type: 'expense', isDefault: true, userId: req.user._id },
+        { name: 'Salary', type: 'income', isDefault: true, userId: req.user._id },
+        { name: 'Freelance', type: 'income', isDefault: true, userId: req.user._id },
+        { name: 'Investment', type: 'income', isDefault: true, userId: req.user._id },
+        { name: 'Others', type: 'expense', isDefault: true, userId: req.user._id },
+        { name: 'Others', type: 'income', isDefault: true, userId: req.user._id },
+      ];
+      await Category.insertMany(defaultCategories);
+      
+      // Fetch again after seeding
+      categories = await Category.find({
+        $or: [{ userId: req.user._id }, { isDefault: true }],
+      }).sort({ type: 1, name: 1 });
+    }
 
     res.status(200).json({
       success: true,
