@@ -7,7 +7,9 @@ import Transaction from "../models/Transaction.js";
 // ─────────────────────────────────────────────
 export const createTransaction = async (req, res) => {
   try {
-    const { type, title, amount, category, paymentMethod, description, transactionDate } = req.body;
+    console.log("RECEIVED PAYLOAD:", req.body);
+    let { type, title, amount, category, Category, paymentMethod, description, transactionDate } = req.body;
+    category = category || Category;
 
     const transaction = await Transaction.create({
       type,
@@ -104,7 +106,7 @@ export const getTransactions = async (req, res) => {
 // @desc    Update a transaction
 // @route   PUT /api/transactions/:id
 // @access  Private
-// ─────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────────────────
 export const updateTransaction = async (req, res) => {
   try {
     let transaction = await Transaction.findById(req.params.id);
@@ -118,9 +120,15 @@ export const updateTransaction = async (req, res) => {
       return res.status(401).json({ success: false, message: "Not authorized to update this transaction" });
     }
 
+    // Handle potential category vs Category mismatch from frontend
+    const updateData = { ...req.body };
+    if (updateData.Category && !updateData.category) {
+      updateData.category = updateData.Category;
+    }
+
     transaction = await Transaction.findByIdAndUpdate(
       req.params.id,
-      req.body,
+      updateData,
       { new: true, runValidators: true }
     );
 
