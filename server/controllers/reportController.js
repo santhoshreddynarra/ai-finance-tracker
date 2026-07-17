@@ -90,15 +90,28 @@ export const downloadReport = async (req, res) => {
 
     if (format === "csv") {
       const csvHeader = "Date,Title,Category,Type,Amount,Payment Method\n";
+      
+      const escapeCSV = (value) => {
+        if (value == null) return '""';
+        let str = String(value);
+        // Prevent CSV Injection (formula injection)
+        if (/^[=+\-@]/.test(str)) {
+          str = "'" + str;
+        }
+        // Escape double quotes by doubling them
+        str = str.replace(/"/g, '""');
+        return `"${str}"`;
+      };
+
       const csvRows = transactions.map(t => {
         const date = new Date(t.transactionDate).toLocaleDateString();
-        return `"${date}","${t.title}","${t.category}","${t.type}",${t.amount},"${t.paymentMethod}"`;
+        return `${escapeCSV(date)},${escapeCSV(t.title)},${escapeCSV(t.category)},${escapeCSV(t.type)},${t.amount},${escapeCSV(t.paymentMethod)}`;
       }).join("\n");
       
       res.setHeader("Content-Type", "text/csv");
       res.setHeader("Content-Disposition", "attachment; filename=report.csv");
       return res.status(200).send(csvHeader + csvRows);
-    } 
+    }
     else if (format === "pdf") {
       const doc = new PDFDocument({ margin: 50 });
       res.setHeader("Content-Type", "application/pdf");
