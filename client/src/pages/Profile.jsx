@@ -18,7 +18,6 @@ const Profile = () => {
           transactionsCount: analyticsRes.data.data.categoryBreakdown.reduce((acc, curr) => acc + curr.count, 0) || 0,
           currentSavings: analyticsRes.data.data.summary.totalSavings || 0,
           budgetsCreated: budgetRes.data.data.length || 0,
-          aiUsage: Math.floor(Math.random() * 50) + 10, // Mock AI usage since we don't track it in DB yet
         });
       } catch (error) {
         console.error("Failed to load profile stats", error);
@@ -65,7 +64,7 @@ const Profile = () => {
 
       {/* Quick Statistics */}
       <h2 className="text-xl font-semibold text-white tracking-tight mb-4">Quick Statistics</h2>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         
         <div className="bg-white/5 border border-white/10 rounded-2xl p-5 shadow-lg">
           <div className="w-10 h-10 rounded-full bg-emerald-500/20 flex items-center justify-center mb-4">
@@ -89,14 +88,6 @@ const Profile = () => {
           </div>
           <p className="text-slate-400 text-sm">Budgets Created</p>
           <h3 className="text-2xl font-bold text-white mt-1">{stats.budgetsCreated}</h3>
-        </div>
-
-        <div className="bg-white/5 border border-white/10 rounded-2xl p-5 shadow-lg">
-          <div className="w-10 h-10 rounded-full bg-violet-500/20 flex items-center justify-center mb-4">
-            <svg className="w-5 h-5 text-violet-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
-          </div>
-          <p className="text-slate-400 text-sm">AI Insights Used</p>
-          <h3 className="text-2xl font-bold text-white mt-1">{stats.aiUsage} <span className="text-sm font-normal text-slate-500">requests</span></h3>
         </div>
 
       </div>
