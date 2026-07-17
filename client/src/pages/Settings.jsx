@@ -21,7 +21,7 @@ const Settings = () => {
   const handleUpdateProfile = async (e) => {
     e.preventDefault();
     try {
-      await dispatch(updateProfile({ name, email, preferences: { theme, currency } })).unwrap();
+      await dispatch(updateProfile({ name, email })).unwrap();
       toast.success("Profile updated successfully!");
     } catch (err) {
       toast.error(err || "Failed to update profile");
@@ -81,23 +81,7 @@ const Settings = () => {
             </div>
 
             <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-xs font-medium text-slate-400 mb-1">Currency</label>
-                <select value={currency} onChange={(e) => setCurrency(e.target.value)}
-                  className="w-full bg-black/20 border border-white/10 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-violet-500">
-                  <option value="INR">INR (₹)</option>
-                  <option value="USD">USD ($)</option>
-                  <option value="EUR">EUR (€)</option>
-                </select>
-              </div>
-              <div>
-                <label className="block text-xs font-medium text-slate-400 mb-1">Theme</label>
-                <select value={theme} onChange={(e) => setTheme(e.target.value)}
-                  className="w-full bg-black/20 border border-white/10 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-violet-500">
-                  <option value="dark">Dark Mode</option>
-                  <option value="light">Light Mode</option>
-                </select>
-              </div>
+              {/* Currency and Theme settings removed as they are not currently supported */}
             </div>
 
             <button type="submit"
