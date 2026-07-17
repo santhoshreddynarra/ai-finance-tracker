@@ -31,13 +31,11 @@ const AIInsights = () => {
   const {
     provider,
     financialScore,
-    spendingSummary,
     monthlyComparison,
     expenseForecast,
     smartInsights,
     personalizedRecommendations,
-    biggestExpenses,
-    topCategory
+    biggestExpenses
   } = data;
 
   const formatCurrency = (val) => `₹${Math.abs(Number(val)).toLocaleString("en-IN")}`;

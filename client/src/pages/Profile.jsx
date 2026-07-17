@@ -20,8 +20,8 @@ const Profile = () => {
           budgetsCreated: budgetRes.data.data.length || 0,
           aiUsage: Math.floor(Math.random() * 50) + 10, // Mock AI usage since we don't track it in DB yet
         });
-      } catch (err) {
-        console.error("Failed to load profile stats");
+      } catch (error) {
+        console.error("Failed to load profile stats", error);
       } finally {
         setLoading(false);
       }

@@ -35,8 +35,8 @@ export const upsertBudget = async (req, res) => {
   try {
     const { monthlyBudget, categoryBudgets } = req.body;
 
-    if (monthlyBudget === undefined) {
-      return res.status(400).json({ success: false, message: "Please provide a monthlyBudget" });
+    if (monthlyBudget === undefined || monthlyBudget < 0) {
+      return res.status(400).json({ success: false, message: "Please provide a valid monthlyBudget" });
     }
 
     let budget = await Budget.findOne({ userId: req.user._id });

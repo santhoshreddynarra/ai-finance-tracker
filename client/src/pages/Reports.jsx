@@ -16,21 +16,21 @@ const Reports = () => {
   const [month, setMonth] = useState(new Date().getMonth());
   const [year, setYear] = useState(new Date().getFullYear());
 
-  const fetchReport = async () => {
-    setLoading(true);
-    try {
-      const startDate = new Date(year, month, 1).toISOString();
-      const endDate = new Date(year, month + 1, 0, 23, 59, 59).toISOString();
-      const res = await api.get(`/reports?startDate=${startDate}&endDate=${endDate}`);
-      setReportData(res.data.data);
-    } catch (err) {
-      toast.error("Failed to load reports");
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
+    const fetchReport = async () => {
+      setLoading(true);
+      try {
+        const startDate = new Date(year, month, 1).toISOString();
+        const endDate = new Date(year, month + 1, 0, 23, 59, 59).toISOString();
+        const res = await api.get(`/reports?startDate=${startDate}&endDate=${endDate}`);
+        setReportData(res.data.data);
+      } catch (error) {
+        console.error("Failed to load reports", error);
+        toast.error("Failed to load reports");
+      } finally {
+        setLoading(false);
+      }
+    };
     fetchReport();
   }, [month, year]);
 
@@ -53,7 +53,8 @@ const Reports = () => {
       link.parentNode.removeChild(link);
       
       toast.success(`${format.toUpperCase()} downloaded successfully!`, { id: toastId });
-    } catch (err) {
+    } catch (error) {
+      console.error("Failed to download report", error);
       toast.error("Failed to download report", { id: toastId });
     }
   };

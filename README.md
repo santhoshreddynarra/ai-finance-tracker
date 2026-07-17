@@ -13,6 +13,17 @@ A premium, production-grade SaaS application designed to help users manage their
 - **⚙️ Account Settings:** Full control over profile details, passwords, theme preferences, and secure account deletion.
 - **📱 Responsive Design:** Fully responsive glassmorphism UI optimized for desktop, tablet, and mobile. Includes loading skeletons, smooth animations, and toast notifications for every action.
 
+## 📸 Screenshots
+
+![Dashboard Placeholder](https://via.placeholder.com/800x400?text=Dashboard+View)
+*The main dashboard providing a quick overview of financial health.*
+
+![Transactions Placeholder](https://via.placeholder.com/800x400?text=Transactions+View)
+*Detailed transaction tracking with advanced filters and pagination.*
+
+![AI Insights Placeholder](https://via.placeholder.com/800x400?text=AI+Insights+View)
+*AI-driven financial intelligence and recommendations.*
+
 ## 🏗️ Architecture & Tech Stack
 
 ### Frontend

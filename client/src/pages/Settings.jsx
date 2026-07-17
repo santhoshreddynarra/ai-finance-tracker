@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import toast from "react-hot-toast";
 import api from "../services/api";
-import { loginSuccess } from "../store/slices/authSlice";
+import { updateProfile, changePassword } from "../store/slices/authSlice";
 
 const Settings = () => {
   const { user } = useSelector((state) => state.auth);
@@ -15,36 +15,28 @@ const Settings = () => {
   const [theme, setTheme] = useState(user?.preferences?.theme || "dark");
   const [currency, setCurrency] = useState(user?.preferences?.currency || "INR");
 
-  const [loadingProfile, setLoadingProfile] = useState(false);
-  const [loadingPassword, setLoadingPassword] = useState(false);
+
   const [loadingDelete, setLoadingDelete] = useState(false);
 
   const handleUpdateProfile = async (e) => {
     e.preventDefault();
-    setLoadingProfile(true);
     try {
-      const res = await api.put("/auth/profile", { name, email, preferences: { theme, currency } });
-      dispatch(loginSuccess({ user: res.data.user, token: localStorage.getItem("token") }));
+      await dispatch(updateProfile({ name, email, preferences: { theme, currency } })).unwrap();
       toast.success("Profile updated successfully!");
     } catch (err) {
-      toast.error(err.response?.data?.message || "Failed to update profile");
-    } finally {
-      setLoadingProfile(false);
+      toast.error(err || "Failed to update profile");
     }
   };
 
   const handleChangePassword = async (e) => {
     e.preventDefault();
-    setLoadingPassword(true);
     try {
-      await api.put("/auth/password", { currentPassword, newPassword });
+      await dispatch(changePassword({ currentPassword, newPassword })).unwrap();
       toast.success("Password changed successfully!");
       setCurrentPassword("");
       setNewPassword("");
     } catch (err) {
-      toast.error(err.response?.data?.message || "Failed to change password");
-    } finally {
-      setLoadingPassword(false);
+      toast.error(err || "Failed to change password");
     }
   };
 
@@ -108,9 +100,9 @@ const Settings = () => {
               </div>
             </div>
 
-            <button type="submit" disabled={loadingProfile}
+            <button type="submit"
               className="w-full bg-violet-600 hover:bg-violet-700 text-white font-medium py-2.5 rounded-xl text-sm transition-colors mt-2">
-              {loadingProfile ? "Saving..." : "Save Changes"}
+              Save Changes
             </button>
           </form>
         </div>
@@ -131,9 +123,9 @@ const Settings = () => {
                 className="w-full bg-black/20 border border-white/10 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-violet-500" />
             </div>
 
-            <button type="submit" disabled={loadingPassword}
+            <button type="submit"
               className="w-full bg-white/10 hover:bg-white/20 text-white font-medium py-2.5 rounded-xl text-sm transition-colors mt-2">
-              {loadingPassword ? "Updating..." : "Update Password"}
+              Update Password
             </button>
           </form>
 
