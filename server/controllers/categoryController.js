@@ -7,32 +7,49 @@ export const getCategories = async (req, res) => {
   try {
     // Get custom categories for the user AND default categories (userId: null)
     let categories = await Category.find({
-      $or: [{ userId: req.user._id }, { isDefault: true }],
+      $or: [{ userId: req.user._id }, { isDefault: true, userId: null }],
     }).sort({ type: 1, name: 1 });
 
-    if (categories.length === 0) {
-      // Seed default categories for this user if none exist
+    const hasDefaults = categories.some((c) => c.isDefault && c.userId === null);
+
+    if (!hasDefaults) {
+      // Seed default categories globally if none exist
       const defaultCategories = [
-        { name: 'Food', type: 'expense', isDefault: true, userId: req.user._id },
-        { name: 'Transport', type: 'expense', isDefault: true, userId: req.user._id },
-        { name: 'Shopping', type: 'expense', isDefault: true, userId: req.user._id },
-        { name: 'Bills', type: 'expense', isDefault: true, userId: req.user._id },
-        { name: 'Entertainment', type: 'expense', isDefault: true, userId: req.user._id },
-        { name: 'Healthcare', type: 'expense', isDefault: true, userId: req.user._id },
-        { name: 'Education', type: 'expense', isDefault: true, userId: req.user._id },
-        { name: 'Salary', type: 'income', isDefault: true, userId: req.user._id },
-        { name: 'Freelance', type: 'income', isDefault: true, userId: req.user._id },
-        { name: 'Investment', type: 'income', isDefault: true, userId: req.user._id },
-        { name: 'Others', type: 'expense', isDefault: true, userId: req.user._id },
-        { name: 'Others', type: 'income', isDefault: true, userId: req.user._id },
+        { name: 'Food', type: 'expense', isDefault: true, userId: null },
+        { name: 'Transport', type: 'expense', isDefault: true, userId: null },
+        { name: 'Shopping', type: 'expense', isDefault: true, userId: null },
+        { name: 'Bills', type: 'expense', isDefault: true, userId: null },
+        { name: 'Entertainment', type: 'expense', isDefault: true, userId: null },
+        { name: 'Healthcare', type: 'expense', isDefault: true, userId: null },
+        { name: 'Education', type: 'expense', isDefault: true, userId: null },
+        { name: 'Salary', type: 'income', isDefault: true, userId: null },
+        { name: 'Freelance', type: 'income', isDefault: true, userId: null },
+        { name: 'Investment', type: 'income', isDefault: true, userId: null },
+        { name: 'Others', type: 'expense', isDefault: true, userId: null },
+        { name: 'Others', type: 'income', isDefault: true, userId: null },
       ];
-      await Category.insertMany(defaultCategories);
+      try {
+        await Category.insertMany(defaultCategories, { ordered: false });
+      } catch (err) {
+        // Ignore duplicate key errors from concurrent requests
+      }
       
       // Fetch again after seeding
       categories = await Category.find({
-        $or: [{ userId: req.user._id }, { isDefault: true }],
+        $or: [{ userId: req.user._id }, { isDefault: true, userId: null }],
       }).sort({ type: 1, name: 1 });
     }
+
+    // Deduplicate to prevent older users with user-specific defaults from seeing duplicates
+    const uniqueCategoriesMap = new Map();
+    categories.forEach(cat => {
+      const key = `${cat.type}-${cat.name}`;
+      // Prefer user-specific over global default if there's a duplicate
+      if (!uniqueCategoriesMap.has(key) || cat.userId !== null) {
+        uniqueCategoriesMap.set(key, cat);
+      }
+    });
+    categories = Array.from(uniqueCategoriesMap.values());
 
     res.status(200).json({
       success: true,

@@ -67,22 +67,29 @@ export const signup = async (req, res) => {
     // 4. Create user — the model's pre-save hook handles password hashing
     const user = await User.create({ name, email, password });
 
-    // Seed default categories for this user
-    const defaultCategories = [
-      { name: 'Food', type: 'expense', isDefault: true, userId: user._id },
-      { name: 'Transport', type: 'expense', isDefault: true, userId: user._id },
-      { name: 'Shopping', type: 'expense', isDefault: true, userId: user._id },
-      { name: 'Bills', type: 'expense', isDefault: true, userId: user._id },
-      { name: 'Entertainment', type: 'expense', isDefault: true, userId: user._id },
-      { name: 'Healthcare', type: 'expense', isDefault: true, userId: user._id },
-      { name: 'Education', type: 'expense', isDefault: true, userId: user._id },
-      { name: 'Salary', type: 'income', isDefault: true, userId: user._id },
-      { name: 'Freelance', type: 'income', isDefault: true, userId: user._id },
-      { name: 'Investment', type: 'income', isDefault: true, userId: user._id },
-      { name: 'Others', type: 'expense', isDefault: true, userId: user._id },
-      { name: 'Others', type: 'income', isDefault: true, userId: user._id },
-    ];
-    await Category.insertMany(defaultCategories);
+    // Ensure global default categories exist
+    const defaultCount = await Category.countDocuments({ isDefault: true, userId: null });
+    if (defaultCount === 0) {
+      const defaultCategories = [
+        { name: 'Food', type: 'expense', isDefault: true, userId: null },
+        { name: 'Transport', type: 'expense', isDefault: true, userId: null },
+        { name: 'Shopping', type: 'expense', isDefault: true, userId: null },
+        { name: 'Bills', type: 'expense', isDefault: true, userId: null },
+        { name: 'Entertainment', type: 'expense', isDefault: true, userId: null },
+        { name: 'Healthcare', type: 'expense', isDefault: true, userId: null },
+        { name: 'Education', type: 'expense', isDefault: true, userId: null },
+        { name: 'Salary', type: 'income', isDefault: true, userId: null },
+        { name: 'Freelance', type: 'income', isDefault: true, userId: null },
+        { name: 'Investment', type: 'income', isDefault: true, userId: null },
+        { name: 'Others', type: 'expense', isDefault: true, userId: null },
+        { name: 'Others', type: 'income', isDefault: true, userId: null },
+      ];
+      try {
+        await Category.insertMany(defaultCategories, { ordered: false });
+      } catch (err) {
+        // Ignore duplicate key errors from concurrent requests
+      }
+    }
 
     // 5. Generate JWT
     const token = generateToken(user._id);
