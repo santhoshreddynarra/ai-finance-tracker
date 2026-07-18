@@ -31,32 +31,37 @@ const TransactionModal = ({ isOpen, onClose, transactionToEdit }) => {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
+    if (!isOpen) return;
     if (transactionToEdit) {
       setForm({
         ...transactionToEdit,
         transactionDate: new Date(transactionToEdit.transactionDate).toISOString().split("T")[0]
       });
     } else {
-      // Reset form
-      const expenseCategories = categories.filter(c => c.type === "expense");
-      setForm({
-        type: "expense",
-        title: "",
-        amount: "",
-        category: expenseCategories.length > 0 ? expenseCategories[0].name : "",
-        paymentMethod: "Cash",
-        description: "",
-        transactionDate: new Date().toISOString().split("T")[0],
+      setForm(prev => {
+        const currentTypeCategories = categories.filter(c => c.type === prev.type);
+        return {
+          ...prev,
+          category: prev.category || (currentTypeCategories.length > 0 ? currentTypeCategories[0].name : "")
+        };
       });
     }
     setErrors({});
   }, [transactionToEdit, isOpen, categories]);
 
   useEffect(() => {
-    if (isOpen && categories.length === 0) {
-      dispatch(fetchCategories());
+    if (!isOpen && !transactionToEdit) {
+      setForm({
+        type: "expense",
+        title: "",
+        amount: "",
+        category: "",
+        paymentMethod: "Cash",
+        description: "",
+        transactionDate: new Date().toISOString().split("T")[0],
+      });
     }
-  }, [isOpen, dispatch, categories.length]);
+  }, [isOpen, transactionToEdit]);
 
   if (!isOpen) return null;
 

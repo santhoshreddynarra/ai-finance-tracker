@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { logout } from "../../store/slices/authSlice";
+import { fetchCategories } from "../../store/slices/categorySlice";
 
 const navigation = [
   { name: "Dashboard", href: "/dashboard", disabled: false },
@@ -20,6 +21,13 @@ const DashboardLayout = ({ children }) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { items: categories } = useSelector((state) => state.categories);
+
+  React.useEffect(() => {
+    if (categories.length === 0) {
+      dispatch(fetchCategories());
+    }
+  }, [dispatch, categories.length]);
 
   const handleLogout = () => {
     dispatch(logout());
