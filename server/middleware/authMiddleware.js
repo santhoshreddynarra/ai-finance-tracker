@@ -18,6 +18,9 @@ export const protect = async (req, res, next) => {
       token = req.headers.authorization.split(" ")[1];
 
       // 3. Verify token
+      if (!process.env.JWT_SECRET) {
+        throw new Error('JWT_SECRET is not defined');
+      }
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
       // 4. Get user from the token and attach to req
