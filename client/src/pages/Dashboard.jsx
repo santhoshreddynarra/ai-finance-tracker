@@ -70,7 +70,7 @@ const Dashboard = () => {
             </div>
             <div>
               <p className="text-xs text-slate-400">Total Transactions</p>
-              <p className="text-sm font-medium text-emerald-400">{recentTransactions.length > 0 ? recentTransactions.length + '+' : 0}</p>
+              <p className="text-sm font-medium text-emerald-400">{data.summary.transactionsCount || 0}</p>
             </div>
           </div>
         </div>

@@ -12,7 +12,7 @@ const Profile = () => {
       try {
         // Fetch dashboard analytics to get savings and transaction count
         const analyticsRes = await api.get("/analytics/dashboard");
-        const budgetRes = await api.get("/budgets");
+
         
         setStats({
           transactionsCount: analyticsRes.data.data.summary.transactionsCount || 0,
