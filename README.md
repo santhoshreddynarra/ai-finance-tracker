@@ -68,11 +68,43 @@ AI-Finance-Tracker/
    cd server
    npm install
    ```
-3. **Install Frontend Dependencies**
+7. **Install Frontend Dependencies**
    ```bash
    cd client
    npm install
    ```
+
+## 🚀 Running Locally
+
+1. **Start the backend server:**
+   ```bash
+   cd server
+   npm run dev
+   ```
+   The backend will run on `http://localhost:5000`.
+
+2. **Start the frontend application:**
+   ```bash
+   cd client
+   npm run dev
+   ```
+   The frontend will run on `http://localhost:5173`.
+
+## 🌍 Deployment Instructions
+
+### Backend (Render / Heroku)
+1. Push your code to a GitHub repository.
+2. Create a new Web Service on Render (or similar platform).
+3. Connect your repository and select the `server` root directory.
+4. Set the Build Command to `npm install` and the Start Command to `npm start`.
+5. Add all Environment Variables from your `.env` file into the platform's dashboard.
+
+### Frontend (Vercel / Netlify)
+1. Create a new project on Vercel or Netlify.
+2. Connect your repository and set the root directory to `client`.
+3. Set the Build Command to `npm run build` and Output Directory to `dist`.
+4. Add the `VITE_API_URL` environment variable pointing to your deployed backend URL.
+5. Deploy the application.
 
 ## 🔑 Environment Variables
 

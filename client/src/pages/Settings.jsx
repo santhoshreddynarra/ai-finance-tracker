@@ -12,8 +12,6 @@ const Settings = () => {
   const [email, setEmail] = useState(user?.email || "");
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
-  const [theme, setTheme] = useState(user?.preferences?.theme || "dark");
-  const [currency, setCurrency] = useState(user?.preferences?.currency || "INR");
 
 
   const [loadingDelete, setLoadingDelete] = useState(false);
@@ -80,9 +78,7 @@ const Settings = () => {
                 className="w-full bg-black/20 border border-white/10 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-violet-500" />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              {/* Currency and Theme settings removed as they are not currently supported */}
-            </div>
+
 
             <button type="submit"
               className="w-full bg-violet-600 hover:bg-violet-700 text-white font-medium py-2.5 rounded-xl text-sm transition-colors mt-2">
