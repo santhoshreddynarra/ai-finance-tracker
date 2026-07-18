@@ -1,4 +1,5 @@
 import Transaction from "../models/Transaction.js";
+import Category from "../models/Category.js";
 
 // ─────────────────────────────────────────────
 // @desc    Create a new transaction
@@ -7,8 +8,19 @@ import Transaction from "../models/Transaction.js";
 // ─────────────────────────────────────────────
 export const createTransaction = async (req, res) => {
   try {
-    let { type, title, amount, category, Category, paymentMethod, description, transactionDate } = req.body;
-    category = category || Category;
+    let { type, title, amount, category, Category: altCategory, paymentMethod, description, transactionDate } = req.body;
+    category = category || altCategory;
+
+    // Verify category exists
+    if (category) {
+      const categoryExists = await Category.findOne({
+        name: category,
+        $or: [{ userId: req.user._id }, { userId: null }]
+      });
+      if (!categoryExists) {
+        return res.status(400).json({ success: false, message: "Invalid category selected" });
+      }
+    }
 
     const transaction = await Transaction.create({
       type,
@@ -131,6 +143,17 @@ export const updateTransaction = async (req, res) => {
     // Handle potential category vs Category mismatch from frontend
     if (req.body.Category && !updateData.category) {
       updateData.category = req.body.Category;
+    }
+
+    // Verify category exists if it is being updated
+    if (updateData.category) {
+      const categoryExists = await Category.findOne({
+        name: updateData.category,
+        $or: [{ userId: req.user._id }, { userId: null }]
+      });
+      if (!categoryExists) {
+        return res.status(400).json({ success: false, message: "Invalid category selected" });
+      }
     }
 
     transaction = await Transaction.findByIdAndUpdate(

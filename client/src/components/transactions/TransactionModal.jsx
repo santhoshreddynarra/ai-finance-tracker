@@ -4,6 +4,7 @@ import { addTransaction, editTransaction } from "../../store/slices/transactionS
 import { fetchCategories } from "../../store/slices/categorySlice";
 import InputField from "../ui/InputField";
 import Button from "../ui/Button";
+import toast from "react-hot-toast";
 
 
 const PAYMENT_METHODS = [
@@ -100,7 +101,10 @@ const TransactionModal = ({ isOpen, onClose, transactionToEdit }) => {
     setLoading(false);
 
     if (!result.error) {
+      toast.success(transactionToEdit ? "Transaction updated successfully!" : "Transaction added successfully!");
       onClose();
+    } else {
+      toast.error(result.payload?.message || result.error?.message || "Failed to save transaction");
     }
   };
 

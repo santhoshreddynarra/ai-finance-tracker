@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchTransactions, setFilters, setPage, removeTransaction } from "../store/slices/transactionSlice";
 import TransactionModal from "../components/transactions/TransactionModal";
+import toast from "react-hot-toast";
 
 const Transactions = () => {
   const dispatch = useDispatch();
@@ -44,9 +45,14 @@ const Transactions = () => {
     dispatch(setPage(1));
   };
 
-  const handleDelete = (id) => {
+  const handleDelete = async (id) => {
     if (window.confirm("Are you sure you want to delete this transaction?")) {
-      dispatch(removeTransaction(id));
+      const result = await dispatch(removeTransaction(id));
+      if (!result.error) {
+        toast.success("Transaction deleted successfully!");
+      } else {
+        toast.error(result.payload?.message || result.error?.message || "Failed to delete transaction");
+      }
     }
   };
 
