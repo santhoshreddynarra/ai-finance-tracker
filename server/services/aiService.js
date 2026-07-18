@@ -157,7 +157,6 @@ const getLocalInsights = (stats, budget) => {
     budgetHealth,
     expenseForecast: {
       forecastAmount,
-      confidence: 85,
       budgetRisk,
     },
     smartInsights,
@@ -203,7 +202,7 @@ export const getFinancialInsights = async (userId) => {
       {
         "financialScore": { "score": Number (0-100), "description": "Excellent|Good|Needs Improvement|Critical" },
         "budgetHealth": "String (e.g. Excellent, Warning, Critical)",
-        "expenseForecast": { "forecastAmount": Number, "confidence": Number (0-100), "budgetRisk": "Safe|Warning|High Risk" },
+        "expenseForecast": { "forecastAmount": Number, "budgetRisk": "Safe|Warning|High Risk" },
         "smartInsights": ["String", "String", ...],
         "personalizedRecommendations": ["String", "String", ...]
       }
