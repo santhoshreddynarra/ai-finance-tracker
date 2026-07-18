@@ -68,7 +68,7 @@ AI-Finance-Tracker/
    cd server
    npm install
    ```
-7. **Install Frontend Dependencies**
+3. **Install Frontend Dependencies**
    ```bash
    cd client
    npm install

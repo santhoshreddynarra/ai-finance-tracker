@@ -1,6 +1,6 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
-import { Provider } from "react-redux";
+import { Provider, useSelector } from "react-redux";
 import { Toaster } from "react-hot-toast";
 import store from "./store/store";
 
@@ -17,6 +17,12 @@ import AIInsights from "./pages/AIInsights";
 import NotFound from "./pages/NotFound";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 import DashboardLayout from "./components/layout/DashboardLayout";
+
+const RootRedirect = () => {
+  const { isAuthenticated, loading } = useSelector((state) => state.auth);
+  if (loading) return null;
+  return isAuthenticated ? <Navigate to="/dashboard" replace /> : <Navigate to="/login" replace />;
+};
 
 const App = () => {
   return (
@@ -41,7 +47,7 @@ const App = () => {
           </Route>
 
           {/* Default redirect */}
-          <Route path="/" element={<Navigate to="/login" replace />} />
+          <Route path="/" element={<RootRedirect />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </Router>

@@ -104,7 +104,7 @@ const TransactionModal = ({ isOpen, onClose, transactionToEdit }) => {
       toast.success(transactionToEdit ? "Transaction updated successfully!" : "Transaction added successfully!");
       onClose();
     } else {
-      toast.error(result.payload?.message || result.error?.message || "Failed to save transaction");
+      toast.error(result.payload?.message || "Something went wrong");
     }
   };
 
