@@ -81,7 +81,7 @@ AI-Finance-Tracker/
    cd server
    npm run dev
    ```
-   The backend will run on `http://localhost:5000`.
+   The backend will run on `https://ai-finance-tracker-01.vercel.app/api/auth/register`.
 
 2. **Start the frontend application:**
    ```bash
