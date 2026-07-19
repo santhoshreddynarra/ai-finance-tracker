@@ -25,20 +25,20 @@ const NotificationItem = ({ notification, onMarkAsRead, getIcon }) => {
       </div>
       <div className="flex-1 min-w-0">
         <div className="flex justify-between items-start mb-0.5">
-          <p className={`text-sm font-medium truncate pr-2 transition-colors ${!notification.read ? "text-white" : "text-slate-300 group-hover:text-white"}`}>
+          <p className="text-sm font-medium truncate pr-2 text-white">
             {notification.title}
           </p>
-          <span className="text-xs text-slate-500 flex-shrink-0 whitespace-nowrap">
+          <span className="text-xs text-slate-400 flex-shrink-0 whitespace-nowrap">
             {formatDate(notification.createdAt)}
           </span>
         </div>
-        <p className={`text-sm line-clamp-2 transition-colors ${!notification.read ? "text-slate-300" : "text-slate-400 group-hover:text-slate-300"}`}>
+        <p className="text-sm line-clamp-2 text-slate-300">
           {notification.description}
         </p>
       </div>
       {!notification.read && (
         <div className="flex-shrink-0 ml-2 mt-1.5">
-          <div className="w-2 h-2 rounded-full bg-violet-500 shadow-[0_0_8px_rgba(139,92,246,0.5)]" />
+          <div className="w-2 h-2 rounded-full bg-violet-500" />
         </div>
       )}
     </div>
@@ -259,7 +259,7 @@ const NotificationDropdown = () => {
 
       <div 
         ref={dropdownRef}
-        className={`absolute right-0 sm:-right-2 mt-2 w-[95vw] sm:w-[380px] bg-[#1b1b2d] backdrop-blur-xl rounded-xl shadow-2xl border border-white/10 z-50 origin-top-right transition-all duration-200 flex flex-col ${
+        className={`absolute right-0 sm:-right-2 mt-2 w-[95vw] sm:w-[380px] bg-[#1A1B26] backdrop-blur-md rounded-2xl shadow-2xl border border-white/10 z-[9999] origin-top-right transition-all duration-200 flex flex-col ${
           isOpen ? "opacity-100 scale-100 translate-y-0 visible" : "opacity-0 scale-95 -translate-y-2 invisible"
         }`}
       >
