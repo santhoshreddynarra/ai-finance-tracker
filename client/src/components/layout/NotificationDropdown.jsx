@@ -63,32 +63,17 @@ const NotificationDropdown = () => {
   const { items: transactions } = useSelector((state) => state.transactions);
   const { data: dashboardData } = useSelector((state) => state.dashboard);
 
-  // Close when clicking outside
   useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (
-        dropdownRef.current && 
-        !dropdownRef.current.contains(event.target) &&
-        buttonRef.current &&
-        !buttonRef.current.contains(event.target)
-      ) {
-        setIsOpen(false);
-      }
-    };
-
     const handleKeyDown = (e) => {
       if (e.key === "Escape" && isOpen) {
         setIsOpen(false);
         buttonRef.current?.focus();
       }
     };
-
     if (isOpen) {
-      document.addEventListener("mousedown", handleClickOutside);
       document.addEventListener("keydown", handleKeyDown);
     }
     return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
       document.removeEventListener("keydown", handleKeyDown);
     };
   }, [isOpen]);
@@ -257,51 +242,58 @@ const NotificationDropdown = () => {
         )}
       </button>
 
-      <div 
-        ref={dropdownRef}
-        className={`absolute right-0 sm:-right-2 mt-2 w-[95vw] sm:w-[380px] bg-[#1A1B26] backdrop-blur-md rounded-2xl shadow-2xl border border-white/10 z-[9999] origin-top-right transition-all duration-200 flex flex-col ${
-          isOpen ? "opacity-100 scale-100 translate-y-0 visible" : "opacity-0 scale-95 -translate-y-2 invisible"
-        }`}
-      >
-        <div className="flex items-center justify-between px-4 py-3 border-b border-white/10 shrink-0">
-          <h3 className="text-base font-semibold text-white">Notifications</h3>
-          {unreadCount > 0 && (
-            <span className="bg-violet-500/20 text-violet-400 text-xs font-medium py-1 px-2.5 rounded-full">
-              {unreadCount} New
-            </span>
-          )}
-        </div>
-
-        <div className="overflow-y-auto max-h-[340px] scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent py-1">
-          {notifications.length > 0 ? (
-            notifications.map((notif) => (
-              <NotificationItem
-                key={notif.id}
-                notification={notif}
-                onMarkAsRead={handleMarkAsRead}
-                getIcon={getIconForType}
-              />
-            ))
-          ) : (
-            <div className="flex flex-col items-center justify-center py-10 px-4 text-center">
-              <div className="text-4xl mb-4 opacity-80">🔔</div>
-              <p className="text-sm font-medium text-white mb-1">No notifications yet</p>
-              <p className="text-sm text-slate-400">Start adding transactions and budgets.</p>
+      {isOpen && (
+        <>
+          <div 
+            className="fixed inset-0 z-[9998]" 
+            onClick={() => setIsOpen(false)}
+            aria-hidden="true"
+          />
+          <div 
+            ref={dropdownRef}
+            className="absolute right-0 sm:-right-2 mt-2 w-[95vw] sm:w-[380px] bg-[#1A1B26] backdrop-blur-sm rounded-2xl shadow-2xl border border-white/10 z-[9999] flex flex-col"
+          >
+            <div className="flex items-center justify-between px-4 py-3 border-b border-white/10 shrink-0">
+              <h3 className="text-base font-semibold text-white">Notifications</h3>
+              {unreadCount > 0 && (
+                <span className="bg-violet-500/20 text-violet-400 text-xs font-medium py-1 px-2.5 rounded-full">
+                  {unreadCount} New
+                </span>
+              )}
             </div>
-          )}
-        </div>
 
-        {notifications.length > 0 && (
-          <div className="p-2 border-t border-white/10 shrink-0">
-            <button
-              onClick={handleClearAll}
-              className="w-full py-2.5 px-4 text-sm font-medium text-slate-300 hover:text-white hover:bg-white/5 rounded-lg transition-colors text-center focus:outline-none focus:bg-white/5"
-            >
-              Clear All
-            </button>
+            <div className="overflow-y-auto max-h-[340px] scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent py-1 relative z-[10000]">
+              {notifications.length > 0 ? (
+                notifications.map((notif) => (
+                  <NotificationItem
+                    key={notif.id}
+                    notification={notif}
+                    onMarkAsRead={handleMarkAsRead}
+                    getIcon={getIconForType}
+                  />
+                ))
+              ) : (
+                <div className="flex flex-col items-center justify-center py-10 px-4 text-center">
+                  <div className="text-4xl mb-4 opacity-80">🔔</div>
+                  <p className="text-sm font-medium text-white mb-1">No notifications yet</p>
+                  <p className="text-sm text-slate-400">Start adding transactions and budgets.</p>
+                </div>
+              )}
+            </div>
+
+            {notifications.length > 0 && (
+              <div className="p-2 border-t border-white/10 shrink-0 relative z-[10000]">
+                <button
+                  onClick={handleClearAll}
+                  className="w-full py-2.5 px-4 text-sm font-medium text-slate-300 hover:text-white hover:bg-white/5 rounded-lg transition-colors text-center focus:outline-none focus:bg-white/5"
+                >
+                  Clear All
+                </button>
+              </div>
+            )}
           </div>
-        )}
-      </div>
+        </>
+      )}
     </div>
   );
 };
