@@ -3,7 +3,6 @@ import { useSelector, useDispatch } from "react-redux";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { logout } from "../../store/slices/authSlice";
 import { fetchCategories } from "../../store/slices/categorySlice";
-import NotificationDropdown from "./NotificationDropdown";
 
 const navigation = [
   { name: "Dashboard", href: "/dashboard", disabled: false },
@@ -111,7 +110,6 @@ const DashboardLayout = ({ children }) => {
           </div>
           
           <div className="flex-1 flex justify-end items-center gap-4">
-            <NotificationDropdown />
             {/* User */}
             <Link to="/profile" className="flex items-center gap-2 group">
               <div className="w-8 h-8 rounded-full bg-gradient-to-r from-violet-500 to-indigo-500 flex items-center justify-center text-white font-medium text-sm">
