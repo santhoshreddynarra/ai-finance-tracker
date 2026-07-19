@@ -259,7 +259,7 @@ const NotificationDropdown = () => {
 
       <div 
         ref={dropdownRef}
-        className={`absolute right-0 sm:-right-2 mt-2 w-[95vw] sm:w-[380px] bg-[#1b1b28]/95 backdrop-blur-xl rounded-xl shadow-2xl border border-white/10 z-50 origin-top-right transition-all duration-200 flex flex-col ${
+        className={`absolute right-0 sm:-right-2 mt-2 w-[95vw] sm:w-[380px] bg-[#1b1b2d] backdrop-blur-xl rounded-xl shadow-2xl border border-white/10 z-50 origin-top-right transition-all duration-200 flex flex-col ${
           isOpen ? "opacity-100 scale-100 translate-y-0 visible" : "opacity-0 scale-95 -translate-y-2 invisible"
         }`}
       >
